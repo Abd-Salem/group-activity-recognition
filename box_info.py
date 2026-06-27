@@ -9,12 +9,12 @@ class BoxInfo:
         (player_id, x_min,y_min,x_max,y_max, frame_id,
         lost, grouping, generated, annot) = splits
 
-        self.player_id = player_id
-        self.bounding_box = x_min, y_min, x_max, y_max
-        self.frame_id = frame_id
-        self.lost = lost
-        self.grouping = grouping
-        self.generated = generated
+        self.player_id = int(player_id)
+        self.bounding_box = int(x_min), int(y_min), int(x_max), int(y_max)
+        self.frame_id = int(frame_id)
+        self.lost = int(lost)
+        self.grouping = int(grouping)
+        self.generated = int(generated)
         self.annotation = annot
 
 
