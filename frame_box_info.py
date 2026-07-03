@@ -38,6 +38,6 @@ class BoxInfo:
         self.lost = int(lost)
         self.grouping = int(grouping)
         self.generated = int(generated)
-        self.annotation = annot
+        self.category = annot
 
 
