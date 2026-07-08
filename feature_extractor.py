@@ -91,4 +91,4 @@ def load_feature_extractor():
 if __name__ == '__main__':
     full_image = True       # extract features of full frame
     extractor = load_feature_extractor()
-    prepare_data_extract_features(full_image=full_image, extractor=extractor)
+    prepared_dataset = prepare_data_extract_features(full_image=full_image, extractor=extractor)
