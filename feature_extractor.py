@@ -1,19 +1,14 @@
 import os
 import matplotlib.pyplot as plt
 import torch, cv2
-import torchvision.models as models
 from torchvision import transforms
 from PIL import Image
 from torchvision.models import resnet50, ResNet50_Weights
-from volleyball_annot_loader_utils import dataset_root, load_volleyball_dataset
+from volleyball_annot_loader_utils import load_tracking_annotation, dataset_root
 
 #   videos_annots['video_num']['clip_num']  -> frames_boxes dct contain each frame info  & annotations
 #   frames_boxes_dct[frame_id]              -> Frame-info object contains: frame_id, list of boxes-info, ball info
 #   Boxes_info[player_id]                   -> Box-Info object contains:player_id, frame_id, bounding-box, category
-#
-videos_annots = load_volleyball_dataset()
-videos_root = f'{dataset_root}/videos_sample'
-
 
 
 def check():
@@ -40,9 +35,12 @@ def check():
 
 
 def load_extractor():
-    # resnet 50 architecture which will be used for feature extraction
+    '''
+    Using resnet-50 architecture for feature extraction
+    :return: extractorg
+    '''
     resnet = resnet50(weights=ResNet50_Weights.DEFAULT)
-    desired_arch = resnet.children()[:-1]           # drop fc layer
+    desired_arch = list(resnet.children())[:-1]           # drop fc layer
     extractor = torch.nn.Sequential(*desired_arch)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -50,67 +48,65 @@ def load_extractor():
     extractor.eval()
     return extractor
 
-def get_processor():
-    processor = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                              std=[0.229, 0.224, 0.225])
-    ])
+
+def get_processor(full_image=False):
+    '''
+    get processor for preprocessing with respect to image level (full, crop)
+    :param full_image: image level (full, crop)
+    :return: processor
+    '''
+    if full_image:
+        processor = transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.CenterCrop((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+        ])
+    else:
+        processor = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                  std=[0.229, 0.224, 0.225])
+        ])
     return processor
 
-def prepare_data_extract_features(full_image=True, extractor=None):
-    '''
-    1- load videos following a custom schema (video_annotations dct structure)
-    2- convert each image to RGB
-    3- apply processor on dataset (resize, tensor, normalize)
-    4- utilize data shape to be (B, CH, H, W)
-    :return:
-    '''
 
-    prepared_dataset = {}
-    extracted_features = {}
-    processor = get_processor()
+def extract_features(clip_path, annot_path, model, output_file, full_image=False):
+    frame_boxes = load_tracking_annotation(annot_path)
 
-    # inference mode
-    if extractor:
-        extractor.eval()
-
-    for vid_num in videos_annots:
-        prepared_dataset[vid_num] = {}
-        extracted_features[vid_num] = {}
-        for clip_num in videos_annots[vid_num]:
-            prepared_dataset[vid_num][clip_num] = {}
-            extracted_features[vid_num][clip_num] = {}
-            for frame_num in videos_annots[vid_num][clip_num]['frames_boxes_dct']:
-                frame_path = os.path.join(videos_root, vid_num, clip_num, f'{frame_num}.jpg')
-                frame = Image.open(frame_path).convert('RGB')
+    with model.no_grad():
+        for frame_id, frame_info in frame_boxes.items():
+            try:
+                frame_path = os.path.join(clip_path, f'{frame_id}.jpg')
+                img = Image.open(frame_path).convert('RGB')
+                processor = get_processor(full_image=full_image)
 
                 if full_image:
-                    processed_frame = processor(frame)
-                    prepared_dataset[vid_num][clip_num][frame_num] = processed_frame
-                    if extractor:
-                        with extractor.no_grad():
-                            extracted_features[vid_num][clip_num][frame_num] = extractor(processed_frame)
-                else:
-                    # crop -> transform -> stack
-                    processed_cropped_boxes, extracted_features_boxes = [], []
-                    for box in videos_annots[vid_num][clip_num]['frames_boxes_dct'][frame_num].boxes_info:
-                        crop = frame.crop(box.bounding_box)
-                        processed_crop = processor(crop)
-                        processed_cropped_boxes.append(processed_crop)
-                        if extractor:
-                            with extractor.no_grad():
-                                extracted_features[vid_num][clip_num][frame_num] = extractor(processed_crop)
+                    processed_img = processor(img).unsqueeze(0)
+                    repr = model(processed_img)
+                    repr = repr.view(1, -1)
 
-                    prepared_dataset[vid_num][clip_num][frame_num] = processed_cropped_boxes
-                    if extractor:
-                        extracted_features[vid_num][clip_num][frame_num] = extracted_features_boxes
-    if extractor:
-        return prepared_dataset, extracted_features
-    return prepared_dataset
+                else:
+                    processed_crops = []
+                    for box_info in frame_info.boxes_info:
+                        crop = img.crop(box_info.bounding_box)
+                        processed_crop = processor(crop).unsqueeze(0)
+                        processed_crops.append(processed_crop)
+                    processed_img = torch.cat(processed_crops)
+                    repr = model(processed_img)
+                    repr = repr.view(len(processed_img), -1)
+
+            except Exception as e:
+                print(f'Error: {e}')
+
+
+
 
 if __name__ == '__main__':
-    full_image = True       # extract features of full frame
-    extractor = load_extractor()
-    prepared_dataset = prepare_data_extract_features(full_image=full_image, extractor=extractor)
+    check()
+
+    videos_root = f'{dataset_root}/videos'
+    annot_root = f'{dataset_root}/volleyball_tracking_annotation'
+    output_root = f'{dataset_root}/features/image-level/resnet'
