@@ -14,12 +14,15 @@ from volleyball_annot_loader_utils import dataset_root, load_volleyball_dataset
 videos_annots = load_volleyball_dataset()
 videos_root = f'{dataset_root}/videos_sample'
 
-processor = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                          std=[0.229, 0.224, 0.225])
-])
+
+def get_processor():
+    processor = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                              std=[0.229, 0.224, 0.225])
+    ])
+    return processor
 
 def prepare_data_extract_features(full_image=True, extractor=None):
     '''
@@ -32,6 +35,7 @@ def prepare_data_extract_features(full_image=True, extractor=None):
 
     prepared_dataset = {}
     extracted_features = {}
+    processor = get_processor()
 
     # inference mode
     if extractor:
