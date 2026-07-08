@@ -15,6 +15,29 @@ videos_annots = load_volleyball_dataset()
 videos_root = f'{dataset_root}/videos_sample'
 
 
+
+def check():
+    '''
+    make some checks: torch version ? , used device(cuda, cpu) ?, number of used devices ?
+    '''
+    print(f'Torch Version: {torch.__version__}')
+
+    if torch.cuda.is_available():
+        print('Cuda is available')
+
+        device_num = torch.cuda.device_count()
+        print(f'Device count: {device_num}')
+
+        for i in range(device_num):
+            print(f'Device {i}: {torch.get_device_name(i)}')
+
+    else:
+        print('Cuda is not available. Using CPU')
+
+    current_device_name = torch.cuda.current_device() if torch.cuda.is_available() else 'CPU'
+    print(f'Current Device: {current_device_name}')
+
+
 def get_processor():
     processor = transforms.Compose([
         transforms.Resize((224, 224)),
