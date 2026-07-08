@@ -38,6 +38,18 @@ def check():
     print(f'Current Device: {current_device_name}')
 
 
+
+def load_extractor():
+    # resnet 50 architecture which will be used for feature extraction
+    resnet = resnet50(weights=ResNet50_Weights.DEFAULT)
+    desired_arch = resnet.children()[:-1]           # drop fc layer
+    extractor = torch.nn.Sequential(*desired_arch)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    extractor.to(device)        # load model to device
+    extractor.eval()
+    return extractor
+
 def get_processor():
     processor = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -98,24 +110,7 @@ def prepare_data_extract_features(full_image=True, extractor=None):
         return prepared_dataset, extracted_features
     return prepared_dataset
 
-
-
-def load_feature_extractor():
-    '''
-    load resnet and drop fc layers from architecture
-    :return: extractor
-    '''
-    resnet = resnet50(weights=ResNet50_Weights.DEFAULT)
-    new_arch = list(resnet.children())[:-1]          # drop last fc layer
-    feature_extractor = torch.nn.Sequential(*new_arch)  # create feature extractor
-    # freeze auto grad engine
-    for param in feature_extractor.parameters():
-        param.requires_grad = False
-
-    return feature_extractor
-
-
 if __name__ == '__main__':
     full_image = True       # extract features of full frame
-    extractor = load_feature_extractor()
+    extractor = load_extractor()
     prepared_dataset = prepare_data_extract_features(full_image=full_image, extractor=extractor)
