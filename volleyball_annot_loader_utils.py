@@ -12,7 +12,7 @@ custom_key = lambda x: (not x.isdigit(), int(x) if x.isdigit() else x)
 #   - Each frame has annotations for 12 players
 #
 
-def load_tracking_annotation(annot_path, ball_path):
+def load_tracking_annotation(annot_path, ball_path=''):
     '''
     loading annotation file and parsing it line by line according to data annotation description
     :param annot_path: data annotation file path
@@ -44,20 +44,21 @@ def load_tracking_annotation(annot_path, ball_path):
         for frame_id, boxes in frames_boxes.items():
             frames_boxes[frame_id] = FrameInfo(frame_id, boxes)
 
-    # get ball annotations and align frames with frames_boxes
-    with open(ball_path, 'r') as file:
-        frame_ball_position = file.readlines()
-    frame_ball_position = frame_ball_position[10:30]
-    frame_ball_position = frame_ball_position[5:-6]
+    if ball_path:
+        # get ball annotations and align frames with frames_boxes
+        with open(ball_path, 'r') as file:
+            frame_ball_position = file.readlines()
+        frame_ball_position = frame_ball_position[10:30]
+        frame_ball_position = frame_ball_position[5:-6]
 
-    # add ball annotation for each frame
-    for ball_pos, frame_id in zip(frame_ball_position, frames_boxes.keys()):
-        frames_boxes[frame_id].add_ball_position(ball_pos)
+        # add ball annotation for each frame
+        for ball_pos, frame_id in zip(frame_ball_position, frames_boxes.keys()):
+            frames_boxes[frame_id].add_ball_position(ball_pos)
 
     return frames_boxes
 
 
-def visualize_clips(player_annot, ball_annot, video_frames):
+def visualize_clips(player_annot, video_frames, ball_annot=''):
     '''
     visualize clipped frames with bounding boxes and annotations
     :param player_annot: path of annotation for each player
@@ -78,7 +79,8 @@ def visualize_clips(player_annot, ball_annot, video_frames):
             cv2.rectangle(img, (x1, y1),(x2, y2), (0, 255, 0), 2)
             cv2.putText(img, box.category, (x1, y1-10),cv2.FONT_HERSHEY_SIMPLEX,
                         0.5, (0, 255, 0), 2)
-        cv2.circle(img, (frame.ball_info[0], frame.ball_info[1]), 8, (0, 0, 255), -1)
+        if ball_annot:
+            cv2.circle(img, (frame.ball_info[0], frame.ball_info[1]), 8, (0, 0, 255), -1)
 
         cv2.imshow('Image', img)
         cv2.waitKey(200)
@@ -196,4 +198,4 @@ if __name__ == '__main__':
     ball_annot = f'{dataset_root}/volleyball_ball_annotation/7/51725.txt'
     video_frames = f'{dataset_root}/videos_sample/7/51725/'
 
-    visualize_clips(player_annot, ball_annot, video_frames)
+    visualize_clips(player_annot, video_frames, ball_annot)
