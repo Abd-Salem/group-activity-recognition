@@ -1,10 +1,10 @@
 import os
-import matplotlib.pyplot as plt
-import torch, cv2
+import torch
+import numpy as np
 from torchvision import transforms
 from PIL import Image
 from torchvision.models import resnet50, ResNet50_Weights
-from volleyball_annot_loader_utils import load_tracking_annotation, dataset_root
+from volleyball_annot_loader_utils import load_tracking_annotation, dataset_root, custom_key
 
 #   videos_annots['video_num']['clip_num']  -> frames_boxes dct contain each frame info  & annotations
 #   frames_boxes_dct[frame_id]              -> Frame-info object contains: frame_id, list of boxes-info, ball info
@@ -73,40 +73,82 @@ def get_processor(full_image=False):
     return processor
 
 
-def extract_features(clip_path, annot_path, model, output_file, full_image=False):
-    frame_boxes = load_tracking_annotation(annot_path)
+def extract_features(videos_root, annot_root, output_root, model, full_image=False):
+    '''
+    extract representations for each frame or for each player of each frame and save them
+    :param videos_root: videos root dir
+    :param annot_root: annotations root dir
+    :param output_root: output root dir
+    :param model: pretrained network for feature extraction
+    :param full_image: full image or crops
+    '''
 
-    with model.no_grad():
-        for frame_id, frame_info in frame_boxes.items():
-            try:
-                frame_path = os.path.join(clip_path, f'{frame_id}.jpg')
-                img = Image.open(frame_path).convert('RGB')
-                processor = get_processor(full_image=full_image)
+    videos_dirs = os.listdir(videos_root)
+    videos_dirs.sort(key=custom_key)
 
-                if full_image:
-                    processed_img = processor(img).unsqueeze(0)
-                    repr = model(processed_img)
-                    repr = repr.view(1, -1)
+    for idx, vid_dir in enumerate(videos_dirs):
+        vid_path = os.path.join(videos_root, vid_dir)
 
-                else:
-                    processed_crops = []
-                    for box_info in frame_info.boxes_info:
-                        crop = img.crop(box_info.bounding_box)
-                        processed_crop = processor(crop).unsqueeze(0)
-                        processed_crops.append(processed_crop)
-                    processed_img = torch.cat(processed_crops)
-                    repr = model(processed_img)
-                    repr = repr.view(len(processed_img), -1)
+        if not os.path.isdir(vid_path):
+            continue
 
-            except Exception as e:
-                print(f'Error: {e}')
+        clips_dirs = os.listdir(vid_path)
+        clips_dirs.sort(key=custom_key)
+
+        for _, clip_dir in enumerate(clips_dirs):
+            clip_path = os.path.join(vid_path, clip_dir)
+
+            if not os.path.isdir(clip_path):
+                continue
+
+            annot_file = os.path.join(annot_root, vid_dir, clip_dir, f'{clip_dir}.txt')
+            output_dir = os.path.join(output_root, vid_dir)
+
+            if not os.path.isdir(output_dir):
+                os.makedirs(output_dir)
+
+            frame_boxes = load_tracking_annotation(annot_file)
+            with model.no_grad():
+                for frame_id, frame_info in frame_boxes.items():
+                    try:
+                        frame_path = os.path.join(clip_path, f'{frame_id}.jpg')
+                        img = Image.open(frame_path).convert('RGB')
+                        processor = get_processor(full_image=full_image)
+
+                        if full_image:
+                            processed_img = processor(img).unsqueeze(0)
+                            repr = model(processed_img)
+                            repr = repr.view(1, -1)
+
+                        else:
+                            processed_crops = []
+                            for box_info in frame_info.boxes_info:
+                                crop = img.crop(box_info.bounding_box)
+                                processed_crop = processor(crop).unsqueeze(0)
+                                processed_crops.append(processed_crop)
+                            processed_img = torch.cat(processed_crops)
+                            repr = model(processed_img)
+                            repr = repr.view(len(processed_img), -1)
+
+                        # saving representations
+                        save_path = os.path.join(output_dir, f'{frame_id}')
+                        np.save(save_path, repr.numpy())
+
+                    except Exception as e:
+                        print(f'Error: {e}')
 
 
 
 
 if __name__ == '__main__':
-    check()
+    check()         # versions and machines
 
+    # root paths
     videos_root = f'{dataset_root}/videos'
     annot_root = f'{dataset_root}/volleyball_tracking_annotation'
     output_root = f'{dataset_root}/features/image-level/resnet'
+
+    full_image = False      # full frame or crops
+
+    model = load_extractor()        # extractor
+    extract_features(videos_root, annot_root, output_root, model, full_image)   # extract features and save them
