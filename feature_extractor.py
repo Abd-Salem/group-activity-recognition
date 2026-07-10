@@ -85,6 +85,7 @@ def extract_features(videos_root, annot_root, output_root, model, full_image=Fal
 
     videos_dirs = os.listdir(videos_root)
     videos_dirs.sort(key=custom_key)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     for idx, vid_dir in enumerate(videos_dirs):
         vid_path = os.path.join(videos_root, vid_dir)
@@ -108,7 +109,7 @@ def extract_features(videos_root, annot_root, output_root, model, full_image=Fal
                 os.makedirs(output_dir)
 
             frame_boxes = load_tracking_annotation(annot_file)
-            with model.no_grad():
+            with torch.no_grad():
                 for frame_id, frame_info in frame_boxes.items():
                     try:
                         frame_path = os.path.join(clip_path, f'{frame_id}.jpg')
@@ -117,6 +118,7 @@ def extract_features(videos_root, annot_root, output_root, model, full_image=Fal
 
                         if full_image:
                             processed_img = processor(img).unsqueeze(0)
+                            processed_img = processed_img.to(device)
                             repr = model(processed_img)
                             repr = repr.view(1, -1)
 
@@ -127,12 +129,13 @@ def extract_features(videos_root, annot_root, output_root, model, full_image=Fal
                                 processed_crop = processor(crop).unsqueeze(0)
                                 processed_crops.append(processed_crop)
                             processed_img = torch.cat(processed_crops)
+                            processed_img = processed_img.to(device)
                             repr = model(processed_img)
                             repr = repr.view(len(processed_img), -1)
 
                         # saving representations
-                        save_path = os.path.join(output_dir, f'{frame_id}')
-                        np.save(save_path, repr.numpy())
+                        output_path = os.path.join(output_dir, f'{frame_id}.npy')
+                        np.save(output_path, repr.cpu().numpy())
 
                     except Exception as e:
                         print(f'Error: {e}')
