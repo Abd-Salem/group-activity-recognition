@@ -6,6 +6,22 @@ from frame_box_info import BoxInfo, FrameInfo
 dataset_root = '/Users/Abdallah Salem/Desktop/group-activity-recognition'
 custom_key = lambda x: (not x.isdigit(), int(x) if x.isdigit() else x)
 
+labels = {
+    'l-pass': 0,
+    'r-pass': 1,
+    'l-spike': 2,
+    'r_spike': 3,
+    'l_set': 4,
+    'r_set': 5,
+    'l_winpoint': 6,
+    'r_winpoint': 7
+}
+
+train_ids = ["1", "3", "6", "7", "10", "13", "15", "16", "18", "22", "23", "31",
+             "32", "36", "38", "39", "40", "41", "42", "48", "50", "52", "53", "54"]
+
+val_ids = ["0", "2", "8", "12", "17", "19", "24", "26", "27", "28", "30", "33", "46", "49", "51"]
+
 # Data relations:
 #
 #   - Each player presents in 20 frames for each video
@@ -104,7 +120,7 @@ def load_clip_annotation(annot_path):
     return clip_annot
 
 
-def load_volleyball_dataset():
+def load_volleyball_dataset(split='train', ball_info=False):
     '''
     Dataset will be loaded from two different paths then it'll be gathered in dct obj
         - clip annotation from annotation.txt file in video dir
@@ -115,17 +131,20 @@ def load_volleyball_dataset():
     # roots
     video_root = os.path.join(dataset_root, 'videos')
     annot_root = os.path.join(dataset_root, 'volleyball_tracking_annotation')
-    ball_root = os.path.join(dataset_root, 'volleyball_ball_annotation')
+    ball_root = os.path.join(dataset_root, 'volleyball_ball_annotation') if ball_info else ''
 
-    # All Annotations
+    # videos labels and frames information
     videos_annots = {}
 
+    vid_dirs = []
+    if split == 'train':
+        vid_dirs = train_ids
+    elif split == 'val':
+        vid_dirs = val_ids
+    vid_dirs.sort()
 
-    vid_dirs_names = os.listdir(video_root)
-    vid_dirs_names.sort(key=custom_key)
-
-    # loop over videos
-    for _, vid_dir_name in enumerate(vid_dirs_names):
+    # loop over split
+    for _, vid_dir_name in enumerate(vid_dirs):
         vid_dir_path = os.path.join(video_root, vid_dir_name)
 
         # Only dir. (skip files)
@@ -154,7 +173,7 @@ def load_volleyball_dataset():
 
             # get frame box info & ball info
             tracking_annot_path = os.path.join(annot_root, vid_dir_name, clip_dir_name, f'{clip_dir_name}.txt')
-            ball_path = os.path.join(ball_root, vid_dir_name, f'{clip_dir_name}.txt')
+            ball_path = os.path.join(ball_root, vid_dir_name, f'{clip_dir_name}.txt')  if ball_root else ''
             frames_boxes = load_tracking_annotation(tracking_annot_path, ball_path)
 
             # group all annotation for each clip
@@ -168,34 +187,48 @@ def load_volleyball_dataset():
     return videos_annots
 
 
-def create_pickle_version():
+def save_annotations(split='train', ball_info=False):
     '''
     save all annotations in pickle file version
+    :param split: train or val or test
+    :param ball_info: load ball information or ignore it
     '''
-    videos_annots = load_volleyball_dataset()
-    with open(f'{dataset_root}/all_annotations.pickle', 'wb') as file:
+    videos_annots = load_volleyball_dataset(split=split, ball_info=ball_info)
+    save_path = os.path.join(dataset_root, 'split-annotations' ,f'{split}', 'annotations.pickle')
+    with open(save_path, 'wb') as file:
         pickle.dump(videos_annots, file)
 
 
-def test_pickle_version():
+def load_annotations(split='train'):
     '''
     Just testing pickle file
+    :param split: train or val or test
     '''
 
-    with open(f'{dataset_root}/all_annotations.pickle', 'rb') as file:
+    save_path = os.path.join(dataset_root, 'split-annotations' ,f'{split}', 'annotations.pickle')
+    with open(save_path, 'rb') as file:
         videos_annots = pickle.load(file)
 
-    frame : FrameInfo = videos_annots['0']['13456']['frames_boxes_dct']
-    print(f'Frame ID: {frame[13456].frame_id}')
-    print(f'Ball Position: {frame[13456].ball_info}')
-    print(f'Player ID: {frame[13456].boxes_info[0].player_id}')
-    print(f'Player position: {frame[13456].boxes_info[0].bounding_box}')
-    print(f'Player category: {frame[13456].boxes_info[0].category}')
+    # get annots and stack them
+    annots = []
+    for vid_id, frames in videos_annots:
+        for frame_id, frame_info in frames:
+            annots.append(frame_info['label'])
+
+    annots = torch.cat(annots)
+
+    return annots
 
 
 if __name__ == '__main__':
-    player_annot = f'{dataset_root}/volleyball_tracking_annotation/7/51725/51725.txt'
-    ball_annot = f'{dataset_root}/volleyball_ball_annotation/7/51725.txt'
-    video_frames = f'{dataset_root}/videos_sample/7/51725/'
+    # testing case
+    # player_annot = f'{dataset_root}/volleyball_tracking_annotation/7/51725/51725.txt'
+    # ball_annot = f'{dataset_root}/volleyball_ball_annotation/7/51725.txt'
+    # video_frames = f'{dataset_root}/videos_sample/7/51725/'
+    #
+    # visualize_clips(player_annot, video_frames, ball_annot)
+    annot_root = f'{dataset_root}/volleyball_tracking_annotation'
 
-    visualize_clips(player_annot, video_frames, ball_annot)
+    annot_file = os.path.join(annot_root, '7', '51725', f'51725.txt')
+    frame_boxes = load_tracking_annotation(annot_file)
+    print(list(frame_boxes.keys()))
