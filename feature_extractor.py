@@ -4,28 +4,12 @@ import numpy as np
 from torchvision import transforms
 from PIL import Image
 from torchvision.models import resnet50, ResNet50_Weights
-from volleyball_annot_loader_utils import load_tracking_annotation, dataset_root, custom_key
+from volleyball_annot_loader_utils import load_tracking_annotation, dataset_root, custom_key, train_ids, val_ids, labels
 
 #   videos_annots['video_num']['clip_num']  -> frames_boxes dct contain each frame info  & annotations
 #   frames_boxes_dct[frame_id]              -> Frame-info object contains: frame_id, list of boxes-info, ball info
 #   Boxes_info[player_id]                   -> Box-Info object contains:player_id, frame_id, bounding-box, category
 
-
-labels = {
-    'l-pass': 0,
-    'r-pass': 1,
-    'l-spike': 2,
-    'r_spike': 3,
-    'l_set': 4,
-    'r_set': 5,
-    'l_winpoint': 6,
-    'r_winpoint': 7
-}
-
-train_ids = ["1", "3", "6", "7", "10", "13", "15", "16", "18", "22", "23", "31",
-             "32", "36", "38", "39", "40", "41", "42", "48", "50", "52", "53", "54"]
-
-val_ids = ["0", "2", "8", "12", "17", "19", "24", "26", "27", "28", "30", "33", "46", "49", "51"]
 
 
 def check():
@@ -108,7 +92,6 @@ def extract_features(videos_root, annot_root, output_root, model, split='train',
         video_dirs = train_ids
     elif split == 'val':
         videos_dirs = val_ids
-
     videos_dirs.sort()
 
     for _, vid_dir in enumerate(videos_dirs):
