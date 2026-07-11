@@ -159,7 +159,7 @@ def load_volleyball_dataset():
 
             # group all annotation for each clip
             clip_annot[clip_dir_name] = {
-                'annotations' : clip_annot_dct[clip_dir_name],
+                'label' : clip_annot_dct[clip_dir_name],
                 'frames_boxes_dct' : frames_boxes
             }
         # group clips for each video
