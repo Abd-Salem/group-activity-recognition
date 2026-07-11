@@ -11,6 +11,23 @@ from volleyball_annot_loader_utils import load_tracking_annotation, dataset_root
 #   Boxes_info[player_id]                   -> Box-Info object contains:player_id, frame_id, bounding-box, category
 
 
+labels = {
+    'l-pass': 0,
+    'r-pass': 1,
+    'l-spike': 2,
+    'r_spike': 3,
+    'l_set': 4,
+    'r_set': 5,
+    'l_winpoint': 6,
+    'r_winpoint': 7
+}
+
+train_ids = ["1", "3", "6", "7", "10", "13", "15", "16", "18", "22", "23", "31",
+             "32", "36", "38", "39", "40", "41", "42", "48", "50", "52", "53", "54"]
+
+val_ids = ["0", "2", "8", "12", "17", "19", "24", "26", "27", "28", "30", "33", "46", "49", "51"]
+
+
 def check():
     '''
     make some checks: torch version ? , used device(cuda, cpu) ?, number of used devices ?
@@ -73,7 +90,7 @@ def get_processor(full_image=False):
     return processor
 
 
-def extract_features(videos_root, annot_root, output_root, model, full_image=False):
+def extract_features(videos_root, annot_root, output_root, model, split='train', full_image=False):
     '''
     extract representations for each frame or for each player of each frame and save them
     :param videos_root: videos root dir
@@ -83,11 +100,18 @@ def extract_features(videos_root, annot_root, output_root, model, full_image=Fal
     :param full_image: full image or crops
     '''
 
-    videos_dirs = os.listdir(videos_root)
-    videos_dirs.sort(key=custom_key)
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    for idx, vid_dir in enumerate(videos_dirs):
+    videos_dirs = []
+    if split == 'train':
+        video_dirs = train_ids
+    elif split == 'val':
+        videos_dirs = val_ids
+
+    videos_dirs.sort()
+
+    for _, vid_dir in enumerate(videos_dirs):
         vid_path = os.path.join(videos_root, vid_dir)
 
         if not os.path.isdir(vid_path):
@@ -103,7 +127,7 @@ def extract_features(videos_root, annot_root, output_root, model, full_image=Fal
                 continue
 
             annot_file = os.path.join(annot_root, vid_dir, clip_dir, f'{clip_dir}.txt')
-            output_dir = os.path.join(output_root, vid_dir)
+            output_dir = os.path.join(output_root, f'{split}', vid_dir)
 
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir)
@@ -154,4 +178,4 @@ if __name__ == '__main__':
     full_image = False      # full frame or crops
 
     model = load_extractor()        # extractor
-    extract_features(videos_root, annot_root, output_root, model, full_image)   # extract features and save them
+    extract_features(videos_root, annot_root, output_root, model, split='train', full_image=full_image)   # extract features and save them
