@@ -120,7 +120,7 @@ def load_clip_annotation(annot_path):
     return clip_annot
 
 
-def load_volleyball_dataset(split='train', ball_info=False):
+def load_volleyball_dataset(ball_info=False):
     '''
     Dataset will be loaded from two different paths then it'll be gathered in dct obj
         - clip annotation from annotation.txt file in video dir
@@ -129,23 +129,19 @@ def load_volleyball_dataset(split='train', ball_info=False):
     '''
 
     # roots
-    video_root = os.path.join(dataset_root, 'videos')
+    videos_root = os.path.join(dataset_root, 'videos')
     annot_root = os.path.join(dataset_root, 'volleyball_tracking_annotation')
     ball_root = os.path.join(dataset_root, 'volleyball_ball_annotation') if ball_info else ''
 
     # videos labels and frames information
     videos_annots = {}
 
-    vid_dirs = []
-    if split == 'train':
-        vid_dirs = train_ids
-    elif split == 'val':
-        vid_dirs = val_ids
+    vid_dirs = os.listdir(videos_root)
     vid_dirs.sort()
 
     # loop over split
     for _, vid_dir in enumerate(vid_dirs):
-        vid_dir_path = os.path.join(video_root, vid_dir)
+        vid_dir_path = os.path.join(videos_root, vid_dir)
 
         # Only dir. (skip files)
         if not os.path.isdir(vid_dir_path):
@@ -187,36 +183,27 @@ def load_volleyball_dataset(split='train', ball_info=False):
     return videos_annots
 
 
-def save_annotations(split='train', ball_info=False):
+def save_annotations(ball_info=False):
     '''
     save all annotations in pickle file version
-    :param split: train or val or test
-    :param ball_info: load ball information or ignore it
+    :param ball_info: get or ignore ball information
     '''
-    videos_annots = load_volleyball_dataset(split=split, ball_info=ball_info)
-    save_path = os.path.join(dataset_root, 'split-annotations' ,f'{split}', 'annotations.pickle')
+    videos_annots = load_volleyball_dataset(ball_info=ball_info)
+    save_path = os.path.join(dataset_root, 'all-annotations', 'annotations.pickle')
     with open(save_path, 'wb') as file:
         pickle.dump(videos_annots, file)
 
 
-def load_annotations(split='train'):
+def load_annotations():
     '''
     load saved annotations
-    :param split: train or val or test
     '''
 
-    save_path = os.path.join(dataset_root, 'split-annotations' ,f'{split}', 'annotations.pickle')
+    save_path = os.path.join(dataset_root, 'all-annotations', 'annotations.pickle')
     with open(save_path, 'rb') as file:
         videos_annots = pickle.load(file)
 
-    # get annots and stack them
-    annots = []
-    for vid_id, frames in videos_annots:
-        for frame_id, frame_info in frames:
-            annots.append(frame_info['label'])
-
-    annots = torch.cat(annots)
-    return annots
+    return videos_annots
 
 
 if __name__ == '__main__':
@@ -226,8 +213,3 @@ if __name__ == '__main__':
     video_frames = f'{dataset_root}/videos_sample/7/51725/'
 
     visualize_clips(player_annot, video_frames, ball_annot)
-    # annot_root = f'{dataset_root}/volleyball_tracking_annotation'
-    #
-    # annot_file = os.path.join(annot_root, '7', '51725', f'51725.txt')
-    # frame_boxes = load_tracking_annotation(annot_file)
-    # print(list(frame_boxes.keys()))
