@@ -74,26 +74,19 @@ def get_processor(full_image=False):
     return processor
 
 
-def extract_features(videos_root, annot_root, output_root, model, split='train',only_target=False, full_image=False):
+def extract_features(videos_root, annot_root, output_root, model, full_image=False):
     '''
     extract representations for each frame or for each player of each frame and save them
     :param videos_root: videos root dir
     :param annot_root: annotations root dir
     :param output_root: output root dir
     :param model: pretrained network for feature extraction
-    :param split: train or val or test
-    :param only_target: extract only target frames features
     :param full_image: full image or crops
     '''
 
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    videos_dirs = []
-    if split == 'train':
-        videos_dirs = train_ids
-    elif split == 'val':
-        videos_dirs = val_ids
+    videos_dirs = os.listdir(videos_root)
     videos_dirs.sort()
 
     for _, vid_dir in enumerate(videos_dirs):
@@ -112,7 +105,7 @@ def extract_features(videos_root, annot_root, output_root, model, split='train',
                 continue
 
             annot_file = os.path.join(annot_root, vid_dir, clip_dir, f'{clip_dir}.txt')
-            output_dir = os.path.join(output_root, f'{split}', vid_dir)
+            output_dir = os.path.join(output_root, vid_dir)
 
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir)
@@ -121,8 +114,6 @@ def extract_features(videos_root, annot_root, output_root, model, split='train',
             with torch.no_grad():
                 for frame_id, frame_info in frame_boxes.items():
                     # extract from target frames only
-                    if only_target and int(frame_id) != int(clip_dir):
-                        continue
                     try:
                         frame_path = os.path.join(clip_path, f'{frame_id}.jpg')
                         img = Image.open(frame_path).convert('RGB')
@@ -166,5 +157,4 @@ if __name__ == '__main__':
     full_image = True      # full frame or crops
 
     model = load_extractor()        # extractor
-    extract_features(videos_root, annot_root, output_root, model,
-                     split='train', only_target= True, full_image=full_image)   # extract features and save them
+    extract_features(videos_root, annot_root, output_root, model, full_image=full_image)   # extract features and save them
