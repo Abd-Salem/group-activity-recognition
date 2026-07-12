@@ -49,7 +49,7 @@ def load_tracking_annotation(annot_path, ball_path=''):
 
         for player_id, boxes in players_boxes.items():
             # clipping frames to be only 9 frames
-            boxes = boxes[5:-6]
+            boxes = boxes[6:-5]
 
             for box in boxes:
                 if box.frame_id not in frames_boxes:
@@ -65,7 +65,7 @@ def load_tracking_annotation(annot_path, ball_path=''):
         with open(ball_path, 'r') as file:
             frame_ball_position = file.readlines()
         frame_ball_position = frame_ball_position[10:30]
-        frame_ball_position = frame_ball_position[5:-6]
+        frame_ball_position = frame_ball_position[6:-5]
 
         # add ball annotation for each frame
         for ball_pos, frame_id in zip(frame_ball_position, frames_boxes.keys()):
@@ -222,13 +222,13 @@ def load_annotations(split='train'):
 
 if __name__ == '__main__':
     # testing case
-    # player_annot = f'{dataset_root}/volleyball_tracking_annotation/7/51725/51725.txt'
-    # ball_annot = f'{dataset_root}/volleyball_ball_annotation/7/51725.txt'
-    # video_frames = f'{dataset_root}/videos_sample/7/51725/'
-    #
-    # visualize_clips(player_annot, video_frames, ball_annot)
-    annot_root = f'{dataset_root}/volleyball_tracking_annotation'
+    player_annot = f'{dataset_root}/volleyball_tracking_annotation/7/51725/51725.txt'
+    ball_annot = f'{dataset_root}/volleyball_ball_annotation/7/51725.txt'
+    video_frames = f'{dataset_root}/videos_sample/7/51725/'
 
-    annot_file = os.path.join(annot_root, '7', '51725', f'51725.txt')
-    frame_boxes = load_tracking_annotation(annot_file)
-    print(list(frame_boxes.keys()))
+    visualize_clips(player_annot, video_frames, ball_annot)
+    # annot_root = f'{dataset_root}/volleyball_tracking_annotation'
+    #
+    # annot_file = os.path.join(annot_root, '7', '51725', f'51725.txt')
+    # frame_boxes = load_tracking_annotation(annot_file)
+    # print(list(frame_boxes.keys()))
