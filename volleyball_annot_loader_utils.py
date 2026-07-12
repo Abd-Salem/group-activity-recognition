@@ -144,8 +144,8 @@ def load_volleyball_dataset(split='train', ball_info=False):
     vid_dirs.sort()
 
     # loop over split
-    for _, vid_dir_name in enumerate(vid_dirs):
-        vid_dir_path = os.path.join(video_root, vid_dir_name)
+    for _, vid_dir in enumerate(vid_dirs):
+        vid_dir_path = os.path.join(video_root, vid_dir)
 
         # Only dir. (skip files)
         if not os.path.isdir(vid_dir_path):
@@ -155,34 +155,34 @@ def load_volleyball_dataset(split='train', ball_info=False):
         annot_path = os.path.join(vid_dir_path, 'annotations.txt')
         clip_annot_dct = load_clip_annotation(annot_path)
 
-        clips_dirs_names = os.listdir(vid_dir_path)
-        clips_dirs_names.sort(key=custom_key)
+        clip_dirs = os.listdir(vid_dir_path)
+        clip_dirs.sort(key=custom_key)
 
         clip_annot = {}
 
         # loop over clips of each video
-        for _, clip_dir_name in enumerate(clips_dirs_names):
-            clip_dir_path = os.path.join(vid_dir_path, clip_dir_name)
+        for _, clip_dir in enumerate(clip_dirs):
+            clip_dir_path = os.path.join(vid_dir_path, clip_dir)
 
             # Only dir. (skip files)
             if not os.path.isdir(clip_dir_path):
                 continue
 
             # Aligning check
-            assert clip_dir_name in clip_annot_dct
+            assert clip_dir in clip_annot_dct
 
             # get frame box info & ball info
-            tracking_annot_path = os.path.join(annot_root, vid_dir_name, clip_dir_name, f'{clip_dir_name}.txt')
-            ball_path = os.path.join(ball_root, vid_dir_name, f'{clip_dir_name}.txt')  if ball_root else ''
+            tracking_annot_path = os.path.join(annot_root, vid_dir, clip_dir, f'{clip_dir}.txt')
+            ball_path = os.path.join(ball_root, vid_dir, f'{clip_dir}.txt')  if ball_root else ''
             frames_boxes = load_tracking_annotation(tracking_annot_path, ball_path)
 
             # group all annotation for each clip
-            clip_annot[clip_dir_name] = {
-                'label' : clip_annot_dct[clip_dir_name],
+            clip_annot[clip_dir] = {
+                'label' : clip_annot_dct[clip_dir],
                 'frames_boxes_dct' : frames_boxes
             }
         # group clips for each video
-        videos_annots[vid_dir_name] = clip_annot
+        videos_annots[vid_dir] = clip_annot
 
     return videos_annots
 
@@ -201,7 +201,7 @@ def save_annotations(split='train', ball_info=False):
 
 def load_annotations(split='train'):
     '''
-    Just testing pickle file
+    load saved annotations
     :param split: train or val or test
     '''
 
@@ -216,7 +216,6 @@ def load_annotations(split='train'):
             annots.append(frame_info['label'])
 
     annots = torch.cat(annots)
-
     return annots
 
 
