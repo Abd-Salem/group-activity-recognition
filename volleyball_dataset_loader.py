@@ -1,7 +1,7 @@
 import os, torch
 import numpy as np
 from torch.utils.data import Dataset
-from volleyball_annot_loader_utils import dataset_root, load_annotations, train_ids
+from volleyball_annot_loader_utils import dataset_root, load_annotations, train_ids,save_annotations
 
 cat = {
     'l-pass': 0,
@@ -41,10 +41,12 @@ def load_feat_annot():
         vid_path = os.path.join(features_root, vid_id)
         if not os.path.isdir(vid_path):
             continue
-
         clips_dir = os.listdir(vid_path)
         clips_dir.sort()
         for t_frame in clips_dir:
+            t_frame = t_frame.replace('.npy', '')
+            if not t_frame in ['38025','51725','18360','20500','20525']:
+                continue
             feature_path = os.path.join(vid_path, f'{t_frame}.npy')
             feature = np.load(feature_path)
             X.append(feature)
@@ -54,4 +56,7 @@ def load_feat_annot():
 
 
 if __name__ == '__main__':
-    pass
+    save_annotations()
+    X, y = load_feat_annot()
+    print(np.array(X).shape)
+    print(y)
