@@ -1,7 +1,7 @@
 import os, torch
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
-from volleyball_annot_loader_utils import load_annotations, train_ids,save_annotations, config
+from volleyball_annot_loader_utils import load_annotations, save_annotations, config
 
 
 class Bl1Dataset(Dataset):
@@ -60,7 +60,7 @@ def load_feat_annot(split):
 
 
 if __name__ == '__main__':
-    X, y = load_feat_annot(split=train_ids)
+    X, y = load_feat_annot(split=config.TRAIN_IDS)
     b1_dataset = Bl1Dataset(features=X, labels=y)
     dataloader = DataLoader(b1_dataset, batch_size=2, shuffle=True)
     for idx, (x, y) in enumerate(dataloader):
