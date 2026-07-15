@@ -9,13 +9,16 @@ class CONFIG:
             data = yaml.safe_load(file)
 
         self.DATASET_ROOT = data['dataset_root']
-        self.VIDEO_ROOT = f'{self.DATASET_ROOT}/videos'
+        self.VIDEO_ROOT = f'{self.DATASET_ROOT}/videos_sample'
+        self.BALL_ROOT = f'{self.DATASET_ROOT}/volleyball_ball_annotation'
         self.FEATURES_ROOT_DIR = f'{self.DATASET_ROOT}/features'
         self.IMAGE_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/image-level'
         self.PLAYER_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/player-level'
         self.ANNOT_ROOT = f'{self.DATASET_ROOT}/all-annotations'
         self.TRACKING_ANNOTS = f'{self.DATASET_ROOT}/volleyball_tracking_annotations'
         self.LABELS = data['labels']
+        self.TRAIN_IDS = data['train_ids']
+        self.VAL_IDS = data['val_ids']
 
         self._create_dirs()
 
