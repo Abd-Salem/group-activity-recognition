@@ -4,7 +4,8 @@ import numpy as np
 from torchvision import transforms
 from PIL import Image
 from torchvision.models import resnet50, ResNet50_Weights
-from volleyball_annot_loader_utils import load_tracking_annotation, dataset_root, custom_key, train_ids, val_ids
+from volleyball_annot_loader_utils import load_tracking_annotation, custom_key, config
+
 
 #   videos_annots['video_num']['clip_num']  -> frames_boxes dct contain each frame info  & annotations
 #   frames_boxes_dct[frame_id]              -> Frame-info object contains: frame_id, list of boxes-info, ball info
@@ -149,12 +150,8 @@ def extract_features(videos_root, annot_root, output_root, model, full_image=Fal
 if __name__ == '__main__':
     check()         # versions and machines
 
-    # root paths
-    videos_root = f'{dataset_root}/videos_sample'
-    annot_root = f'{dataset_root}/volleyball_tracking_annotation'
-    output_root = f'{dataset_root}/features/image-level/resnet'
-
     full_image = True      # full frame or crops
 
     model = load_extractor()        # extractor
-    extract_features(videos_root, annot_root, output_root, model, full_image=full_image)   # extract features and save them
+    extract_features(config.VIDEO_ROOT, config.TRACKING_ANNOTS, f'{config.IMAGE_LEVEL_DIR}/resnet'
+                     , model, full_image=full_image)   # extract features and save them

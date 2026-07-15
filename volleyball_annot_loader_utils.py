@@ -1,26 +1,11 @@
-import torch, cv2
+import cv2
 import os, pickle
 from frame_box_info import BoxInfo, FrameInfo
+from configs import CONFIG
 
 
-dataset_root = '/Users/Abdallah Salem/Desktop/group-activity-recognition'
+config = CONFIG()
 custom_key = lambda x: (not x.isdigit(), int(x) if x.isdigit() else x)
-
-labels = {
-    'l-pass': 0,
-    'r-pass': 1,
-    'l-spike': 2,
-    'r_spike': 3,
-    'l_set': 4,
-    'r_set': 5,
-    'l_winpoint': 6,
-    'r_winpoint': 7
-}
-
-train_ids = ["1", "3", "6", "7", "10", "13", "15", "16", "18", "22", "23", "31",
-             "32", "36", "38", "39", "40", "41", "42", "48", "50", "52", "53", "54"]
-
-val_ids = ["0", "2", "8", "12", "17", "19", "24", "26", "27", "28", "30", "33", "46", "49", "51"]
 
 # Data relations:
 #
@@ -128,20 +113,16 @@ def load_volleyball_dataset(ball_info=False):
     :return: video annotation dct
     '''
 
-    # roots
-    videos_root = os.path.join(dataset_root, 'videos')
-    annot_root = os.path.join(dataset_root, 'volleyball_tracking_annotation')
-    ball_root = os.path.join(dataset_root, 'volleyball_ball_annotation') if ball_info else ''
 
     # videos labels and frames information
     videos_annots = {}
 
-    vid_dirs = os.listdir(videos_root)
+    vid_dirs = os.listdir(config.VIDEO_ROOT)
     vid_dirs.sort()
 
     # loop over split
     for _, vid_dir in enumerate(vid_dirs):
-        vid_dir_path = os.path.join(videos_root, vid_dir)
+        vid_dir_path = os.path.join(config.VIDEO_ROOT, vid_dir)
 
         # Only dir. (skip files)
         if not os.path.isdir(vid_dir_path):
@@ -168,8 +149,8 @@ def load_volleyball_dataset(ball_info=False):
             assert clip_dir in clip_annot_dct
 
             # get frame box info & ball info
-            tracking_annot_path = os.path.join(annot_root, vid_dir, clip_dir, f'{clip_dir}.txt')
-            ball_path = os.path.join(ball_root, vid_dir, f'{clip_dir}.txt')  if ball_root else ''
+            tracking_annot_path = os.path.join(config.TRACKING_ANNOTS, vid_dir, clip_dir, f'{clip_dir}.txt')
+            ball_path = os.path.join(config.BALL_ROOT, vid_dir, f'{clip_dir}.txt')  if ball_info else ''
             frames_boxes = load_tracking_annotation(tracking_annot_path, ball_path)
 
             # group all annotation for each clip
@@ -189,8 +170,12 @@ def save_annotations(ball_info=False):
     :param ball_info: get or ignore ball information
     '''
     videos_annots = load_volleyball_dataset(ball_info=ball_info)
-    save_path = os.path.join(dataset_root, 'all-annotations', 'annotations.pickle')
-    with open(save_path, 'wb') as file:
+
+    if not os.path.isdir(config.ANNOT_ROOT):
+        os.makedirs(config.ANNOT_ROOT)
+
+
+    with open(f'{config.ANNOT_ROOT}/annots.pickle', 'wb') as file:
         pickle.dump(videos_annots, file)
 
 
@@ -199,8 +184,8 @@ def load_annotations():
     load saved annotations
     '''
 
-    save_path = os.path.join(dataset_root, 'all-annotations', 'annotations.pickle')
-    with open(save_path, 'rb') as file:
+    save_file = f'{config.ANNOT_ROOT}/annots.pickle'
+    with open(save_file, 'rb') as file:
         videos_annots = pickle.load(file)
 
     return videos_annots
@@ -208,8 +193,8 @@ def load_annotations():
 
 if __name__ == '__main__':
     # testing case
-    player_annot = f'{dataset_root}/volleyball_tracking_annotation/7/51725/51725.txt'
-    ball_annot = f'{dataset_root}/volleyball_ball_annotation/7/51725.txt'
-    video_frames = f'{dataset_root}/videos_sample/7/51725/'
+    player_annot = f'{config.DATASET_ROOT}/volleyball_tracking_annotation/7/51725/51725.txt'
+    ball_annot = f'{config.BALL_ROOT}/7/51725.txt'
+    video_frames = f'{config.DATASET_ROOT}/videos_sample/7/51725/'
 
     visualize_clips(player_annot, video_frames, ball_annot)
