@@ -39,7 +39,7 @@ def check():
 def load_extractor():
     '''
     Using resnet-50 architecture for feature extraction
-    :return: extractorg
+    :return: extractor
     '''
     resnet = resnet50(weights=ResNet50_Weights.DEFAULT)
     desired_arch = list(resnet.children())[:-1]           # drop fc layer
@@ -153,5 +153,5 @@ if __name__ == '__main__':
     full_image = True      # full frame or crops
 
     model = load_extractor()        # extractor
-    extract_features(config.VIDEO_ROOT, config.TRACKING_ANNOTS, f'{config.IMAGE_LEVEL_DIR}/resnet'
+    extract_features(config.VIDEO_ROOT_DIR, config.TRACKING_ANNOTS_DIR, f'{config.IMAGE_LEVEL_DIR}/resnet'
                      , model, full_image=full_image)   # extract features and save them
