@@ -117,12 +117,12 @@ def load_volleyball_dataset(ball_info=False):
     # videos labels and frames information
     videos_annots = {}
 
-    vid_dirs = os.listdir(config.VIDEO_ROOT)
+    vid_dirs = os.listdir(config.VIDEO_ROOT_DIR)
     vid_dirs.sort()
 
     # loop over split
     for _, vid_dir in enumerate(vid_dirs):
-        vid_dir_path = os.path.join(config.VIDEO_ROOT, vid_dir)
+        vid_dir_path = os.path.join(config.VIDEO_ROOT_DIR, vid_dir)
 
         # Only dir. (skip files)
         if not os.path.isdir(vid_dir_path):
@@ -149,14 +149,15 @@ def load_volleyball_dataset(ball_info=False):
             assert clip_dir in clip_annot_dct
 
             # get frame box info & ball info
-            tracking_annot_path = os.path.join(config.TRACKING_ANNOTS, vid_dir, clip_dir, f'{clip_dir}.txt')
-            ball_path = os.path.join(config.BALL_ROOT, vid_dir, f'{clip_dir}.txt')  if ball_info else ''
+            tracking_annot_path = os.path.join(config.TRACKING_ANNOTS_DIR, vid_dir, clip_dir, f'{clip_dir}.txt')
+            ball_path = os.path.join(config.BALL_ROOT_DIR, vid_dir, f'{clip_dir}.txt')  if ball_info else ''
             frames_boxes = load_tracking_annotation(tracking_annot_path, ball_path)
 
             # group all annotation for each clip
             clip_annot[clip_dir] = {
                 'label' : clip_annot_dct[clip_dir],
-                'frames_boxes_dct' : frames_boxes
+                'frames_boxes_dct' : frames_boxes,
+                'clip_dir_path': clip_dir_path,
             }
         # group clips for each video
         videos_annots[vid_dir] = clip_annot
@@ -171,11 +172,11 @@ def save_annotations(ball_info=False):
     '''
     videos_annots = load_volleyball_dataset(ball_info=ball_info)
 
-    if not os.path.isdir(config.ANNOT_ROOT):
-        os.makedirs(config.ANNOT_ROOT)
+    if not os.path.isdir(config.ANNOT_ROOT_DIR):
+        os.makedirs(config.ANNOT_ROOT_DIR)
 
 
-    with open(f'{config.ANNOT_ROOT}/annots.pickle', 'wb') as file:
+    with open(f'{config.ANNOT_ROOT_DIR}/annots.pickle', 'wb') as file:
         pickle.dump(videos_annots, file)
 
 
@@ -184,7 +185,7 @@ def load_annotations():
     load saved annotations
     '''
 
-    save_file = f'{config.ANNOT_ROOT}/annots.pickle'
+    save_file = f'{config.ANNOT_ROOT_DIR}/annots.pickle'
     with open(save_file, 'rb') as file:
         videos_annots = pickle.load(file)
 
@@ -193,8 +194,8 @@ def load_annotations():
 
 if __name__ == '__main__':
     # testing case
-    player_annot = f'{config.DATASET_ROOT}/volleyball_tracking_annotation/7/51725/51725.txt'
-    ball_annot = f'{config.BALL_ROOT}/7/51725.txt'
-    video_frames = f'{config.DATASET_ROOT}/videos_sample/7/51725/'
+    player_annot = f'{config.DATASET_ROOT_DIR}/volleyball_tracking_annotation/7/51725/51725.txt'
+    ball_annot = f'{config.BALL_ROOT_DIR}/7/51725.txt'
+    video_frames = f'{config.DATASET_ROOT_DIR}/videos_sample/7/51725/'
 
     visualize_clips(player_annot, video_frames, ball_annot)
