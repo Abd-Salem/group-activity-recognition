@@ -158,6 +158,6 @@ def extract_features(model, config=CONFIG(), full_image=False):
 if __name__ == '__main__':
     check()         # versions and machines
     config = CONFIG()
-    full_image = True      # full frame or crops
+    full_image = False      # full frame or crops
     model = load_extractor_for_test()        # resnet50 pretrained model
     extract_features(model, config=config, full_image=full_image)   # extract features and save them

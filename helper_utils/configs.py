@@ -30,16 +30,3 @@ class CONFIG:
         dirs = [self.FEATURES_ROOT_DIR,self.IMAGE_LEVEL_DIR, self.PLAYER_LEVEL_DIR ,self.ANNOT_SAVE_DIR]
         for dir in dirs:
             os.makedirs(dir, exist_ok=True)
-
-
-if __name__ == '__main__':
-    config = CONFIG()
-    train_len = len(config.TRAIN_IDS)
-    val_len = len(config.VAL_IDS)
-    test_len = len(config.TEST_IDS)
-
-    total = train_len + val_len + test_len
-
-    print(f'Train: {train_len}   -  {(train_len/total)*100:.1f}%     - if 80% train = {0.8 * total}')
-    print(f'Val: {val_len}   -  {(val_len/total)*100:.1f}%   -  if 15%  test = {0.15 * total}')
-    print(f'Test: {test_len}   -  {(test_len/total)*100:.1f}%   - if 5%  test = {0.05 * total}')
