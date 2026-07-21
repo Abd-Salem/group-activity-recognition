@@ -4,13 +4,6 @@ from helper_utils.frame_box_info import BoxInfo, FrameInfo
 from helper_utils.configs import CONFIG
 
 custom_key = lambda x: (not x.isdigit(), int(x) if x.isdigit() else x)
-config = CONFIG()
-
-# Data relations:
-#
-#   - Each player presents in 20 frames for each video
-#   - Each frame has annotations for 12 players
-#
 
 def load_tracking_annotation(annot_path, ball_path=''):
     '''
@@ -104,11 +97,12 @@ def load_clip_annotation(annot_path):
     return clip_annot
 
 
-def load_volleyball_dataset(ball_info=False):
+def load_volleyball_dataset(ball_info=False, config=CONFIG()):
     '''
-    Dataset will be loaded from two different paths then it'll be gathered in dct obj
-        - clip annotation from annotation.txt file in video dir
-        - Frame Boxes Info & Ball Info from tracking annotations dir and ball annotations dir
+    loading players boxes info, players annotations, clips' labels and clips' paths in dict
+
+    :param ball_info: load ball information in each frame
+    :param config: configurations (default: CONFIG())
     :return: video annotation dct
     '''
 

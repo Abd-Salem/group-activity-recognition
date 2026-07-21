@@ -3,7 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from volleyball_annot_loader_utils import  load_volleyball_dataset
 from helper_utils.configs import CONFIG
-from helper_utils.more_helpers import extract_features, check, load_extractor
+from helper_utils.feature_extraction import check, load_extractor_for_test
 from PIL import Image
 
 # get configs
@@ -51,47 +51,6 @@ class ImageDataset(Dataset):
         labels = torch.tensor(config.LABELS[self.labels[idx]], dtype=torch.long)
 
         return img, labels
-
-
-
-
-def prepare_dataset_input_label(split, image_level=True, sequence=True, features=True):
-    '''
-    loading images paths and labels
-    :param split: train or val or test
-    :param image_level: True -> full image, False -> players' crops
-    :param sequence: True -> stack frames as one input,   False -> get each frame as one input with clip label
-    :param features: True -> load saved extracted features,  False -> load frames' path
-    :return X: paths
-    :return y: labels
-    '''
-
-    videos_annots = load_volleyball_dataset()
-
-    if image_level:
-        if sequence:
-            if features:
-                pass
-            else:
-                pass
-        else:
-            if features:
-                pass
-            else:
-                X, y = [], []
-                for vid_id in split:
-                    for clip_id in videos_annots[vid_id]:
-
-                        frames_ids = list(videos_annots[vid_id][clip_id]['frames_boxes_dct'].keys())
-                        for frame_id in frames_ids:
-                            frame_path = os.path.join(videos_annots[vid_id][clip_id]['clip_dir_path'],
-                                                      f'{frame_id}.jpg')
-                            X.append(frame_path)
-                            y.append(videos_annots[vid_id][clip_id]['label'])
-
-                return X, y
-
-
 
 
 
@@ -147,9 +106,9 @@ def load_extracted_features(split, image_level=True):
 if __name__ == '__main__':
     check()         # versions and machines
 
-    full_image = False      # full frame or crops
+    full_image = True      # full frame or crops
 
-    model = load_extractor()        # extractor
+    model = load_extractor_for_test()        # extractor
 
     if full_image:
         output_root = f'{config.IMAGE_LEVEL_DIR}/resnet'
