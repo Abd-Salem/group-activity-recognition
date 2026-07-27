@@ -23,6 +23,7 @@ class CONFIG:
         self.TRAIN_IDS = data['train_ids']
         self.VAL_IDS = data['val_ids']
         self.TEST_IDS = data['test_ids']
+        self.TARGET_FRAME_IDX = data['target_frame_idx']
 
         self._create_dirs()
 

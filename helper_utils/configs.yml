@@ -1,6 +1,7 @@
 # dataset root dir
 dataset_root : '/Users/Abdallah Salem/Desktop/group-activity-recognition/dataset'
 
+target_frame_idx : 4
 
 # 8 classes
 labels : {
