@@ -1,6 +1,5 @@
-import os, torch
+import torch
 from torch.utils.data import Dataset
-from volleyball_annot_loader_utils import  load_volleyball_dataset
 from helper_utils.configs import CONFIG
 from torchvision import transforms
 from PIL import Image
@@ -9,7 +8,7 @@ from abc import ABC, abstractmethod
 
 
 
-
+# === Abstract base ===
 class VolleyballDatasetBase(Dataset, ABC):
     def __init__(self):
         super().__init__()
@@ -38,7 +37,7 @@ class VolleyballDatasetBase(Dataset, ABC):
         ...
 
 
-
+# === Dataset implementations ===
 class PersonLevelDataset(VolleyballDatasetBase):
     def __init__(self, paths, labels ,processor=transforms.ToTensor(), temporal=True, clips_info=None, config=None):
         super().__init__()
@@ -86,8 +85,6 @@ class PersonLevelDataset(VolleyballDatasetBase):
         return len(self.labels)
 
 
-
-
 class ImageLevelDataset(VolleyballDatasetBase):
     def __init__(self, paths, labels, processor=transforms.ToTensor(), temporal=True,  config=None):
         super().__init__()
@@ -119,10 +116,3 @@ class ImageLevelDataset(VolleyballDatasetBase):
 
     def __len__(self):
         return len(self.labels)
-
-
-
-
-
-
-
