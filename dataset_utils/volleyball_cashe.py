@@ -1,4 +1,4 @@
-from volleyball_loaders import load_volleyball_dataset
+from volleyball_builders import load_volleyball_dataset
 from helper_utils.configs import CONFIG
 import os, pickle
 
