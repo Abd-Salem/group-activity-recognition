@@ -3,7 +3,6 @@ import os, pickle
 from helper_utils.frame_box_info import BoxInfo, FrameInfo
 from helper_utils.configs import CONFIG
 
-custom_key = lambda x: (not x.isdigit(), int(x) if x.isdigit() else x)
 
 def load_tracking_annotation(annot_path, ball_path=''):
     '''
@@ -97,7 +96,34 @@ def load_clip_annotation(annot_path):
     return clip_annot
 
 
-def load_volleyball_dataset(ball_info=False, config=CONFIG()):
+def save_annotations(ball_info=False):
+    '''
+    save all annotations in pickle file version
+    :param ball_info: get or ignore ball information
+    '''
+    videos_annots = load_volleyball_dataset(ball_info=ball_info)
+
+    if not os.path.isdir(config.ANNOT_SAVE_DIR):
+        os.makedirs(config.ANNOT_SAVE_DIR)
+
+
+    with open(f'{config.ANNOT_SAVE_DIR}/annots.pickle', 'wb') as file:
+        pickle.dump(videos_annots, file)
+
+
+def load_annotations():
+    '''
+    load saved annotations
+    '''
+
+    save_file = f'{config.ANNOT_SAVE_DIR}/annots.pickle'
+    with open(save_file, 'rb') as file:
+        videos_annots = pickle.load(file)
+
+    return videos_annots
+
+
+def load_volleyball_dataset(ball_info=False, config=None):
     '''
     loading players boxes info, players annotations, clips' labels and clips' paths in dict
 
@@ -105,6 +131,9 @@ def load_volleyball_dataset(ball_info=False, config=CONFIG()):
     :param config: configurations (default: CONFIG())
     :return: video annotation dct
     '''
+
+    if config is None:
+        config = CONFIG()
 
 
     # videos labels and frames information
@@ -126,7 +155,7 @@ def load_volleyball_dataset(ball_info=False, config=CONFIG()):
         clip_annot_dct = load_clip_annotation(annot_path)
 
         clips_ids = os.listdir(vid_dir_path)
-        clips_ids.sort(key=custom_key)
+        clips_ids.sort(key=config.CUSTOM_KEY)
 
         clip_annot = {}
 
@@ -158,31 +187,102 @@ def load_volleyball_dataset(ball_info=False, config=CONFIG()):
     return videos_annots
 
 
-def save_annotations(ball_info=False):
+def handle_corrupted_dataset():
     '''
-    save all annotations in pickle file version
-    :param ball_info: get or ignore ball information
-    '''
-    videos_annots = load_volleyball_dataset(ball_info=ball_info)
-
-    if not os.path.isdir(config.ANNOT_SAVE_DIR):
-        os.makedirs(config.ANNOT_SAVE_DIR)
-
-
-    with open(f'{config.ANNOT_SAVE_DIR}/annots.pickle', 'wb') as file:
-        pickle.dump(videos_annots, file)
-
-
-def load_annotations():
-    '''
-    load saved annotations
+    check number of players for each frames in dataset and according to the percentage of corruption
+    there'll be a suitable action
+    :return: handled dataset
     '''
 
-    save_file = f'{config.ANNOT_SAVE_DIR}/annots.pickle'
-    with open(save_file, 'rb') as file:
-        videos_annots = pickle.load(file)
+    # load videos for info validation
+    videos_annots = load_volleyball_dataset()
 
-    return videos_annots
+    n_corrupted_clips, n_clips = 0, 0
+    corrupted_clips_ids = set()
+    for vid_id in videos_annots:
+        # get clips num
+        n_clips += len(videos_annots[vid_id])
+
+        for clip_id in videos_annots[vid_id]:
+            frames_boxes_dct = videos_annots[vid_id][clip_id]['frames_boxes_dct']
+            for frame_info in frames_boxes_dct.values():
+                if len(frame_info) != 12:
+                    n_corrupted_clips += 1
+                    corrupted_clips_ids.add(clip_id)
+                    break
+
+    if (n_corrupted_clips / n_clips) < 0.05:
+        for vid_id in videos_annots:
+            for clip_id in list(videos_annots[vid_id].keys()):
+                if clip_id in corrupted_clips_ids:
+                    del videos_annots[vid_id][clip_id]
+    else:
+        raise ValueError(f"Too many corrupted clips: {n_corrupted_clips}/{n_clips}")
+
+    return videos_annots, corrupted_clips_ids
+
+
+def load_clips_and_labels(split:list, image_level=True, config=None):
+    '''
+    align clips paths with their labels
+    :param split: train, val, test
+    :param image_level: full image or crops
+    :param config: configurations
+    :return: clips, labels, clips info (if crops)
+    '''
+
+    if config is None:
+        config = CONFIG()
+
+    videos_annots, corrupted_clips_ids = handle_corrupted_dataset()
+
+
+    clips, labels, clips_info = [], [], []
+    for vid_id in split:
+        video_path = os.path.join(config.VIDEO_ROOT_DIR, vid_id)
+
+        if not os.path.isdir(video_path):
+            continue
+
+        clips_ids = os.listdir(video_path)
+        clips_ids.sort(key=config.CUSTOM_KEY)
+
+        for clip_id in clips_ids:
+
+            if clip_id in corrupted_clips_ids:
+                continue
+
+            if not os.path.isdir(os.path.join(video_path, clip_id)):
+                continue
+
+            label = videos_annots[vid_id][clip_id]['label']
+            labels.append(label)
+
+            frames_ids = list(videos_annots[vid_id][clip_id]['frames_boxes_dct'].keys())
+            frames_ids.sort(key=config.CUSTOM_KEY)          # frames in each clip are in order
+
+            if image_level:
+                clip = [os.path.join(video_path, clip_id, f'{frame_id}.jpg') for frame_id in frames_ids]
+                clips.append(clip)
+            else:
+                clip, clip_info = [], []
+                for frame_id in frames_ids:
+                    path = os.path.join(video_path, clip_id, f'{frame_id}.jpg')
+                    clip.append(path)
+
+                    # get frame info object and add it to clip info list
+                    frame_info = videos_annots[vid_id][clip_id]['frames_boxes_dct'][frame_id]
+                    frame_boxes_info = frame_info.boxes_info    # list of each frame's boxes info
+                    clip_info.append(frame_boxes_info)
+
+                clips.append(clip)
+                clips_info.append(clip_info)
+
+    if image_level:
+        return clips, labels
+    else:
+        return clips, labels, clips_info
+
 
 
 if __name__ == '__main__':
