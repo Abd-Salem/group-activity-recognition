@@ -16,6 +16,10 @@ class FrameInfo:
         x, y = ball_info.split()
         self.ball_info = (int(x), int(y))
 
+
+    def __len__(self):
+        return len(self.boxes_info)
+
     def __iter__(self):
         return iter(self.boxes_info)
 

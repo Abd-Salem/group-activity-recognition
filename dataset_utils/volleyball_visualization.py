@@ -1,4 +1,4 @@
-from volleyball_loaders import load_tracking_annotation
+from volleyball_builders import load_tracking_annotation
 import cv2, os
 from helper_utils.configs import CONFIG
 

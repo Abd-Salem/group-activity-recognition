@@ -19,8 +19,6 @@ def save_annotations(ball_info=False, config=None):
     with open(f'{config.ANNOT_SAVE_DIR}/annots.pickle', 'wb') as file:
         pickle.dump(videos_annots, file)
 
-
-
 def load_annotations(config=None):
     '''
     load saved annotations

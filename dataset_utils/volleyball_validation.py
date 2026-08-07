@@ -28,7 +28,7 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
         for frame_idx, path in enumerate(clip):
             # check paths
             if not os.path.exists(path):
-                issues.append(f'Clip {clip_idx}/frame{frame_idx}: {path} does not exist !!')
+                issues.append(f'Clip {clip_idx}|frame{frame_idx}: {path} does not exist !!')
                 continue
 
             # check file readability
@@ -37,7 +37,7 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
                     width, height = img.size
                     img.verify()
             except Exception as e:
-                issues.append(f'Clip({clip_idx}) / frame({frame_idx}) / Path( {path} ) / Exception( {e} )')
+                issues.append(f'Clip({clip_idx}) | frame({frame_idx}) | Path( {path} ) | Exception( {e} )')
                 continue
 
             # person level checking
@@ -45,7 +45,7 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
                 frame_boxes = clips_info[clip_idx][frame_idx]
 
                 if len(frame_boxes) != 12:
-                    issues.append(f'Clip({clip_idx}) / Frame({frame_idx}) / Path( {path} ) / Error( Number of player boxes are not 12 )')
+                    issues.append(f'Clip({clip_idx}) | Frame({frame_idx}) | Path( {path} ) | Error( Number of player boxes are not 12 )')
                     continue
 
                 # check bounding boxes
@@ -53,9 +53,9 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
                     x1, y1, x2, y2 = box_info.bounding_box
 
                     if x1 >= x2 or y1 >= y2:
-                        issues.append(f'Clip({clip_idx})/Frame({frame_idx}) / Path( {path} ) / Error( Invalid bounding box )')
+                        issues.append(f'Clip({clip_idx}) | Frame({frame_idx}) | Path( {path} ) | Error( Invalid bounding box )')
                     if x1 < 0 or y1 < 0 or x2 > width or y2 > height:
-                        issues.append(f'Clip({clip_idx})/Frame({frame_idx}) / Path( {path} )  / Error (Bounding box out of frame bounds )')
+                        issues.append(f'Clip({clip_idx}) | Frame({frame_idx}) | Path( {path} )  | Error (Bounding box out of frame bounds )')
 
     # print issues if there are some
     if issues:

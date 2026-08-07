@@ -49,7 +49,7 @@ def load_tracking_annotation(annot_path, ball_path=None):
 
 def load_clip_annotation(annot_path):
     '''
-    reading annotation.txt file for each clip and get clip number and it's annotation
+    reading annotation.txt file for each clip and get clip number and get each's annotation
     :param annot_path: annotations.txt file path
     :return: clip_annot dct
     '''

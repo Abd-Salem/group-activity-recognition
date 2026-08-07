@@ -25,6 +25,8 @@ class CONFIG:
         self.TEST_IDS = data['test_ids']
         self.TARGET_FRAME_IDX = data['target_frame_idx']
 
+        self.CUSTOM_KEY = lambda x: (not x.isdigit(), int(x) if x.isdigit() else x)     # for dir sorting
+
         self._create_dirs()
 
     def _create_dirs(self):

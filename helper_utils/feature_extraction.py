@@ -5,7 +5,7 @@ from torchvision import transforms
 from PIL import Image
 from torchvision.models import resnet50, ResNet50_Weights
 from helper_utils.configs import  CONFIG
-from dataset_utils.volleyball_annot_loader_utils import load_tracking_annotation, custom_key
+from dataset_utils.volleyball_parsers import load_tracking_annotation
 
 
 #   videos_annots['video_num']['clip_num']  -> frames_boxes dct contain each frame info  & annotations
@@ -51,37 +51,58 @@ def load_extractor_for_test():
     return extractor
 
 
-def get_processor(full_image=False):
+def get_processor(full_image=False, split='train'):
     '''
     get processor for preprocessing with respect to image level (full, crop)
     :param full_image: image level (full, crop)
     :return: processor
     '''
+    if split not in ['train', 'val', 'test']:
+        raise ValueError(" split must be 'train' or 'val' or 'test'  ")
+
+    trans = [transforms.Resize((256, 256))]
+
     if full_image:
-        processor = transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.CenterCrop((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225])
+        # full image crop
+        if split == 'train':
+            trans.append(transforms.RandomCrop(224, padding=8))
+        else:
+            trans.append(transforms.CenterCrop((224, 224)))
+
+    if split == 'train':
+        # Augmentations
+        trans.extend([
+            transforms.RandomRotation(degrees=20),
+            transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.03),
+            transforms.RandomAffine(degrees=0, translate=(0.03, 0.03), scale=(0.97, 1.03), shear=(-1,1)),
         ])
-    else:
-        processor = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                  std=[0.229, 0.224, 0.225])
-        ])
-    return processor
+
+    trans.extend([
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        ),
+    ])
+
+    if split == 'train':
+        trans.append(transforms.RandomErasing(p=0.2, scale=(0.02, 0.1)))
 
 
-def extract_features(model, config=CONFIG(), full_image=False):
+    return transforms.Compose(trans)
+
+
+def extract_features(model, full_image=False, config=None):
     '''
     extract representations for each frame or for each player of each frame and save them
     :param model: pretrained network for feature extraction
-    :param config: configurations (default: CONFIG())
-    :param full_image: full image or crops
+    :param full_image: full image or crops (default: False)
+    :param config: configurations (default: None)
+
     '''
+
+    if config is None:
+        config = CONFIG()
 
     # get roots
     videos_root = config.VIDEO_ROOT_DIR
@@ -105,7 +126,7 @@ def extract_features(model, config=CONFIG(), full_image=False):
             continue
 
         clips_dirs = os.listdir(vid_path)
-        clips_dirs.sort(key=custom_key)
+        clips_dirs.sort(key=config.CUSTOM_KEY)
 
         for _, clip_dir in enumerate(clips_dirs):
             clip_path = os.path.join(vid_path, clip_dir)
@@ -160,4 +181,4 @@ if __name__ == '__main__':
     config = CONFIG()
     full_image = False      # full frame or crops
     model = load_extractor_for_test()        # resnet50 pretrained model
-    extract_features(model, config=config, full_image=full_image)   # extract features and save them
+    extract_features(model, full_image=full_image, config=config)   # extract features and save them

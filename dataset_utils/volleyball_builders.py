@@ -68,37 +68,48 @@ def load_volleyball_dataset(ball_info=False, config=None):
 
 def handle_corrupted_dataset():
     '''
-    check number of players for each frames in dataset and according to the percentage of corruption
-    there'll be a suitable action
-    :return: handled dataset
+    investigate corruption percentage and raise an error for too many number of corruptions
+    :return: clean dataset
     '''
 
     # load videos for info validation
     videos_annots = load_volleyball_dataset()
 
-    n_corrupted_clips, n_clips = 0, 0
-    corrupted_clips_ids = set()
-    for vid_id in videos_annots:
-        # get clips num
-        n_clips += len(videos_annots[vid_id])
+    clean_videos, corruption_logs = {}, {}
 
+    for vid_id in list(videos_annots.keys()):
+
+        clips_n = len(videos_annots[vid_id])
+        # if there's no clips delete video
+        if clips_n == 0:
+            del videos_annots[vid_id]
+            print(f'Deleted Video {vid_id}, because it has 0 clips')
+            continue
+
+        clean_videos[vid_id] = {}
+
+        # corruption logs
+        corruption_logs[vid_id] = {'clips_n':0, 'corrupted_n':0, 'corrupted_ids': set()}
+        corrupted=False
+
+        # check corruption
         for clip_id in videos_annots[vid_id]:
             frames_boxes_dct = videos_annots[vid_id][clip_id]['frames_boxes_dct']
             for frame_info in frames_boxes_dct.values():
                 if len(frame_info) != 12:
-                    n_corrupted_clips += 1
-                    corrupted_clips_ids.add(clip_id)
+                    corruption_logs[vid_id]['corrupted_n'] += 1
+                    corruption_logs[vid_id]['corrupted_ids'].add(clip_id)
+                    corrupted = True
                     break
 
-    if (n_corrupted_clips / n_clips) < 0.05:
-        for vid_id in videos_annots:
-            for clip_id in list(videos_annots[vid_id].keys()):
-                if clip_id in corrupted_clips_ids:
-                    del videos_annots[vid_id][clip_id]
-    else:
-        raise ValueError(f"Too many corrupted clips: {n_corrupted_clips}/{n_clips}")
+            # delete clip
+            if corrupted:
+                corrupted = False
+                continue
 
-    return videos_annots, corrupted_clips_ids
+            clean_videos[vid_id][clip_id] = videos_annots[vid_id][clip_id]
+
+    return clean_videos, corruption_logs
 
 def load_clips_and_labels(split:list, image_level=True, config=None):
     '''
@@ -112,10 +123,10 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
     if config is None:
         config = CONFIG()
 
-    videos_annots, corrupted_clips_ids = handle_corrupted_dataset()
-
+    videos_annots, _ = handle_corrupted_dataset()
 
     clips, labels, clips_info = [], [], []
+
     for vid_id in split:
         video_path = os.path.join(config.VIDEO_ROOT_DIR, vid_id)
 
@@ -127,9 +138,6 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
 
         for clip_id in clips_ids:
 
-            if clip_id in corrupted_clips_ids:
-                continue
-
             if not os.path.isdir(os.path.join(video_path, clip_id)):
                 continue
 
@@ -137,7 +145,7 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
             labels.append(label)
 
             frames_ids = list(videos_annots[vid_id][clip_id]['frames_boxes_dct'].keys())
-            frames_ids.sort(key=config.CUSTOM_KEY)          # frames in each clip are in order
+            frames_ids.sort(key=config.CUSTOM_KEY)          # frames in each clip must be in order
 
             if image_level:
                 clip = [os.path.join(video_path, clip_id, f'{frame_id}.jpg') for frame_id in frames_ids]
@@ -156,7 +164,4 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
                 clips.append(clip)
                 clips_info.append(clip_info)
 
-    if image_level:
-        return clips, labels
-    else:
-        return clips, labels, clips_info
+    return clips, labels, clips_info
