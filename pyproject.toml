@@ -1,0 +1,36 @@
+[project]
+name = "group-activity-recognition"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Abd-Salem", email = "abdallah.ahsraf854@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "pillow>=12.3.0",
+    "pyyaml>=6.0.3",
+    "torch>=2.13.0",
+    "torchvision>=0.28.0",
+]
+
+[project.scripts]
+group-activity-recognition = "group_activity_recognition:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+
+[dependency-groups]
+dev = [
+    "opencv-python>=5.0.0.93",
+]
