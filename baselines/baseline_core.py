@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 from torchvision.models import resnet50, ResNet50_Weights
 from torch.utils.data import DataLoader
-from helper_utils.configs import CONFIG
+from configs import CONFIG
 from dataset_utils.baseline_dataset_loader_utils import ImageDataset
 from helper_utils.feature_extraction import get_processor
 from sklearn.metrics import classification_report

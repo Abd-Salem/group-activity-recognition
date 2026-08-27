@@ -4,7 +4,7 @@ import numpy as np
 from torchvision import transforms
 from PIL import Image
 from torchvision.models import resnet50, ResNet50_Weights
-from helper_utils.configs import  CONFIG
+from configs import  CONFIG
 from dataset_utils.volleyball_parsers import load_tracking_annotation
 
 

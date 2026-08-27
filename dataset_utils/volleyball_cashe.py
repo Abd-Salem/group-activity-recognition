@@ -1,5 +1,5 @@
 from volleyball_builders import load_volleyball_dataset
-from helper_utils.configs import CONFIG
+from configs import CONFIG
 import os, pickle
 
 def save_annotations(ball_info=False, config=None):

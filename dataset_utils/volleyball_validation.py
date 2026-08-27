@@ -1,4 +1,4 @@
-from helper_utils.configs import CONFIG
+from configs import CONFIG
 from PIL import Image
 import os
 

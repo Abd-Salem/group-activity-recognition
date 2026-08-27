@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from helper_utils.configs import CONFIG
+from configs import CONFIG
 from torchvision import transforms
 from PIL import Image
 from datetime import datetime, timezone

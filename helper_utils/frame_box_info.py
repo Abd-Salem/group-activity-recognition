@@ -43,5 +43,3 @@ class BoxInfo:
         self.grouping = int(grouping)
         self.generated = int(generated)
         self.category = annot
-
-

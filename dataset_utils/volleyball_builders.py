@@ -1,5 +1,5 @@
 import os
-from helper_utils.configs import  CONFIG
+from configs import  CONFIG
 from volleyball_parsers import load_clip_annotation, load_tracking_annotation
 
 
