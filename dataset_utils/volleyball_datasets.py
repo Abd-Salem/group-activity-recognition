@@ -37,9 +37,9 @@ class VolleyballDatasetBase(Dataset, ABC):
         ...
 
 
-# === Dataset implementations ===
+# === Dataset implementation ===
 class PersonLevelDataset(VolleyballDatasetBase):
-    def __init__(self, paths, labels ,processor=transforms.ToTensor(), temporal=True, clips_info=None, config=None):
+    def __init__(self, paths, labels ,processor, temporal=True, clips_info=None, config=None):
         super().__init__()
 
         self.config = CONFIG() if config is None else config
@@ -53,9 +53,14 @@ class PersonLevelDataset(VolleyballDatasetBase):
     def __getitem__(self, idx):
 
         if self.temporal:
+            # make sure that clips_info is provided
+            if self.clips_info is None:
+                raise ValueError('clips_info must be provided, cannot be None')
+            
             frames_paths = self.paths[idx]
-            frames_info = self.clips_info[idx]      # clip's frames info
+            frames_info = self.clips_info[idx]      # frames' info of the each clip
             clip = []
+
             for path_idx in range(len(frames_paths)):
                 frame = self._load_frame(frames_paths[path_idx])
                 frame_boxes_info = frames_info[path_idx]    # frame's boxes info
@@ -69,7 +74,7 @@ class PersonLevelDataset(VolleyballDatasetBase):
             return clip, self.labels[idx]
 
         else:
-            # get target frame
+            # get target frame  
             img_path = self.paths[idx][self.config.TARGET_FRAME_IDX]
             img = self._load_frame(img_path)
 
@@ -86,7 +91,7 @@ class PersonLevelDataset(VolleyballDatasetBase):
 
 
 class ImageLevelDataset(VolleyballDatasetBase):
-    def __init__(self, paths, labels, processor=transforms.ToTensor(), temporal=True,  config=None):
+    def __init__(self, paths, labels, processor, temporal=True, config=None):
         super().__init__()
 
         self.config = CONFIG() if config is None else config

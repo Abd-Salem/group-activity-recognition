@@ -60,7 +60,7 @@ def get_processor(full_image=False, split='train'):
     if split not in ['train', 'val', 'test']:
         raise ValueError(" split must be 'train' or 'val' or 'test'  ")
 
-    trans = [transforms.Resize((256, 256))]
+    trans = [transforms.Resize((255, 255))]
 
     if full_image:
         # full image crop

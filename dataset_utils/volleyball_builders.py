@@ -1,6 +1,6 @@
 import os
-from configs import  CONFIG
-from volleyball_parsers import load_clip_annotation, load_tracking_annotation
+from configs import CONFIG
+from .volleyball_parsers import load_clip_annotation, load_tracking_annotation
 
 
 def load_volleyball_dataset(ball_info=False, config=None):
@@ -123,7 +123,8 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
     if config is None:
         config = CONFIG()
 
-    videos_annots, _ = handle_corrupted_dataset()
+
+    videos_annots = load_volleyball_dataset(ball_info=False, config=config)
 
     clips, labels, clips_info = [], [], []
 
@@ -145,7 +146,7 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
             labels.append(label)
 
             frames_ids = list(videos_annots[vid_id][clip_id]['frames_boxes_dct'].keys())
-            frames_ids.sort(key=config.CUSTOM_KEY)          # frames in each clip must be in order
+            frames_ids.sort()          # frames in each clip must be in order
 
             if image_level:
                 clip = [os.path.join(video_path, clip_id, f'{frame_id}.jpg') for frame_id in frames_ids]

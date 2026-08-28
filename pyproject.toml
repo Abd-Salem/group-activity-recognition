@@ -33,4 +33,5 @@ torchvision = { index = "pytorch-cpu" }
 [dependency-groups]
 dev = [
     "opencv-python>=5.0.0.93",
+    "pytest>=9.1.1",
 ]
