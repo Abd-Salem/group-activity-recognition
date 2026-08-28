@@ -1,7 +1,7 @@
 from configs import CONFIG
 from PIL import Image
-import os
-from dataset_utils.volleyball_datasets import PersonLevelDataset
+import os, torch
+from dataset_utils.volleyball_datasets import PersonLevelDataset, ImageLevelDataset
 from dataset_utils.volleyball_builders import load_clips_and_labels
 from helper_utils.feature_extraction import get_processor
 from torch.utils.data import DataLoader
@@ -80,32 +80,76 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
 
 
 @pytest.fixture
-def person_level_dataset_loader():
+def dataset_loader():
     '''returns a function to build a person level dataset loader, temporal or not'''
-    def _make_loader(temporal=True):
+    def _make_loader(temporal=True, full_image=True):
         config = CONFIG()
-        processor = get_processor(full_image=False)
+        processor = get_processor(full_image=full_image)
         clips, labels, clips_info = load_clips_and_labels(
-            split=config.TRAIN_IDS, image_level=False, config=config
+            split=config.TRAIN_IDS, image_level=full_image, config=config
         )
-        dataset = PersonLevelDataset(
-            paths=clips, labels=labels, clips_info=clips_info,
-            processor=processor, temporal=temporal
-        )
+
+        if full_image:
+            dataset = ImageLevelDataset(
+                paths=clips, labels=labels, processor=processor,
+                temporal=temporal
+            )
+        else:
+            dataset = PersonLevelDataset(
+                paths=clips, labels=labels, clips_info=clips_info,
+                processor=processor, temporal=temporal
+            )
+
         return DataLoader(dataset=dataset, batch_size=2, shuffle=True)
     return _make_loader
 
-def test_person_level_dataset_temporal(person_level_dataset_loader):
-    '''testing shape of clips and labels loaded using PersonalLevelDataset class (temporal)'''
-    loader = person_level_dataset_loader(temporal=True)
-    for clip, label in loader:
-        assert clip.shape == (2, 9, 12, 3, 255, 255)
-        assert label.shape == (2,)
+
+def test_person_level_dataset_temporal(dataset_loader):
+    '''testing shape and datatype of clips and labels loaded using PersonalLevelDataset class (temporal)'''
+    loader = dataset_loader(temporal=True, full_image=False)
+    clip, label = next(iter(loader))
+
+    assert isinstance(clip, torch.Tensor)
+    assert isinstance(label, torch.Tensor)
+
+    assert clip.shape == (2, 9, 12, 3, 255, 255)
+    assert label.shape == (2, )
 
 
-def test_person_level_dataset_not_temporal(person_level_dataset_loader):
-    '''testing shape of clips and labels loaded from PersonLevelDataset class (not temporal) '''
-    loader = person_level_dataset_loader(temporal=False)
-    for clip, label in loader:
-        assert clip.shape == (2, 12, 3, 255, 255)
-        assert label.shape == (2,)
+def test_person_level_dataset_not_temporal(dataset_loader):
+    '''testing shape and datatype of clips and labels loaded from PersonLevelDataset class (not temporal) '''
+    loader = dataset_loader(temporal=False, full_image=False)
+    clip, label = next(iter(loader))
+
+    assert isinstance(clip, torch.Tensor)
+    assert isinstance(label, torch.Tensor)
+
+    assert clip.shape == (2, 12, 3, 255, 255)
+    assert label.shape == (2, )
+
+
+def test_image_level_dataset_temporal(dataset_loader):
+    '''testing shape and datatype of clips and labels loaded from ImageLevelDataset class (temporal) '''
+    loader = dataset_loader(temporal=True, full_image=True)
+    clip, label = next(iter(loader))
+
+    assert isinstance(clip, torch.Tensor)
+    assert isinstance(label, torch.Tensor)    
+
+    assert clip.shape == (2, 9, 3, 224, 224)
+    assert label.shape == (2, )
+
+
+def test_image_level_dataset_not_temporal(dataset_loader):
+    '''testing shape and datatype of clips and labels loaded from ImageLevelDataset class (not temporal) '''    
+    loader = dataset_loader(temporal=False, full_image=True)
+    clip, label = next(iter(loader))
+
+    assert isinstance(clip, torch.Tensor)
+    assert isinstance(label, torch.Tensor)
+
+    assert clip.shape == (2, 3, 224, 224)
+    assert label.shape == (2, )
+
+
+
