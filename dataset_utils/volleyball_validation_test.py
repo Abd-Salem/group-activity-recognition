@@ -81,7 +81,7 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
 
 @pytest.fixture
 def dataset_loader():
-    '''returns a function to build a person level dataset loader, temporal or not'''
+    '''returns a function to build a person or image level dataset loader, temporal or not'''
     def _make_loader(temporal=True, full_image=True):
         config = CONFIG()
         processor = get_processor(full_image=full_image)
@@ -112,7 +112,7 @@ def test_person_level_dataset_temporal(dataset_loader):
     assert isinstance(clip, torch.Tensor)
     assert isinstance(label, torch.Tensor)
 
-    assert clip.shape == (2, 9, 12, 3, 255, 255)
+    assert clip.shape == (2, 9, 12, 3, 255, 255)       # (batch, Frame, Player, CH, H, W)
     assert label.shape == (2, )
 
 
@@ -124,7 +124,7 @@ def test_person_level_dataset_not_temporal(dataset_loader):
     assert isinstance(clip, torch.Tensor)
     assert isinstance(label, torch.Tensor)
 
-    assert clip.shape == (2, 12, 3, 255, 255)
+    assert clip.shape == (2, 12, 3, 255, 255)       # (batch, Player, CH, H, W)
     assert label.shape == (2, )
 
 
@@ -136,7 +136,7 @@ def test_image_level_dataset_temporal(dataset_loader):
     assert isinstance(clip, torch.Tensor)
     assert isinstance(label, torch.Tensor)    
 
-    assert clip.shape == (2, 9, 3, 224, 224)
+    assert clip.shape == (2, 9, 3, 224, 224)        # (batch, frame, CH, H, W)
     assert label.shape == (2, )
 
 
@@ -148,7 +148,7 @@ def test_image_level_dataset_not_temporal(dataset_loader):
     assert isinstance(clip, torch.Tensor)
     assert isinstance(label, torch.Tensor)
 
-    assert clip.shape == (2, 3, 224, 224)
+    assert clip.shape == (2, 3, 224, 224)       # (batch, CH, H, W)
     assert label.shape == (2, )
 
 
