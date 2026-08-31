@@ -1,9 +1,19 @@
-# dataset root dir
-dataset_root : '/home/abdallah_salem/projects/group-recognition/group-activity-recognition/dataset'
+# environment
+environment: "local"
 
+# environments' roots
+roots:
+    kaggle: "/kaggle/working"
+    local: "/home/abdallah_salem/projects/group-activity-recognition"
+
+# dir names
+dataset_dir_name : 'dataset'
+backbone_dir_name: 'baselines/backbones_checkpoints'
+
+# target frame index
 target_frame_idx : 4
 
-# 8 classes
+# 8-classes / scene level
 labels : {
     'l-pass': 0,
     'r-pass': 1,
@@ -13,6 +23,19 @@ labels : {
     'r_set': 5,
     'l_winpoint': 6,
     'r_winpoint': 7
+}
+
+# 9-actions / player level
+actions: {
+    'waiting' : 0,
+    'setting' : 1,
+    'digging' : 2,
+    'falling' : 3,
+    'spiking' : 4,
+    'blocking': 5,
+    'jumping' : 6,
+    'moving'  : 7,
+    'standing': 8
 }
 
 # splits
