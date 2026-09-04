@@ -104,6 +104,7 @@ class TemporalBackbone(Backbone):
 
     def __init__(self, image_level=True, hidden_size=512):
         super().__init__()
+        self.image_level = image_level
         self.num_classes = 8 if image_level else 9
 
         resnet = resnet50(weights=ResNet50_Weights.DEFAULT)
@@ -115,11 +116,21 @@ class TemporalBackbone(Backbone):
         self.classifier = nn.Linear(in_features=hidden_size, out_features=self.num_classes)
 
     def forward(self, x):
-        b, t, ch, h, w = x.shape
-        feats = self.feature_extractor(x.view(b * t, ch, h, w))
-        feats = feats.view(b, t, -1)
-        _, (h_st, _) = self.lstm(feats)
-        return self.classifier(h_st[-1])
+        if self.image_level:
+            B, T, CH, H, W = x.shape
+            feats = self.feature_extractor(x.view(B * T, CH, H, W))
+            feats = feats.view(B, T, -1)
+            _, (h_st, _) = self.lstm(feats)
+            return self.classifier(h_st[-1])          # (B, num_classes)
+        else:
+            B, T, P, CH, H, W = x.shape
+            feats = self.feature_extractor(x.view(B * T * P, CH, H, W))
+            feats = feats.view(B, T, P, -1).permute(0, 2, 1, 3).reshape(B * P, T, -1)   # (B*P, T, feat_dim)
+
+            _, (h_st, _) = self.lstm(feats)
+            out = self.classifier(h_st[-1])          # (B*P, num_classes)
+        return out.view(B, P, -1)                  # (B, P, num_classes)
+
 
     def save(self, save_dir: str, backbone_name: str, meta: dict):
         resnet_path = self._save_component(
