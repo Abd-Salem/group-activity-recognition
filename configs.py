@@ -9,7 +9,7 @@ class CONFIG:
         with open(path, 'r') as file:
             data = yaml.safe_load(file)
 
-        self.EVN = data['environment']
+        self.ENV = data['environment']
         self.ROOT = data['roots'][self.ENV]
         self.DATASET_ROOT_DIR = Path(self.ROOT) / data['dataset_dir_name']
         self.VIDEO_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/videos'
