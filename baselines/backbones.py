@@ -129,7 +129,7 @@ class TemporalBackbone(Backbone):
 
             _, (h_st, _) = self.lstm(feats)
             out = self.classifier(h_st[-1])          # (B*P, num_classes)
-        return out.view(B, P, -1)                  # (B, P, num_classes)
+            return out.view(B, P, -1)                  # (B, P, num_classes)
 
 
     def save(self, save_dir: str, backbone_name: str, meta: dict):
