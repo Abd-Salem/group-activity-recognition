@@ -12,16 +12,16 @@ class CONFIG:
         self.ENV = data['environment']
         self.ROOT = data['roots'][self.ENV]
         self.DATASET_ROOT_DIR = Path(self.ROOT) / data['dataset_dir_name']
-        self.VIDEO_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/videos'
-        self.ANNOT_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/annotations'
-        self.BALL_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_ball_annotation'
-        self.TRACKING_ANNOTS_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_tracking_annotation'
+        self.VIDEO_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/videos' if self.ENV == 'local' else f'{self.DATASET_ROOT_DIR}/videos'
+        self.ANNOT_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/annotations' if self.ENV == 'local' else ''
+        self.BALL_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_ball_annotation' if self.ENV == 'local' else ''
+        self.TRACKING_ANNOTS_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_tracking_annotation' if self.ENV == 'local' else f'{self.DATASET_ROOT_DIR}/volleyball_tracking_annotation'
         self.FEATURES_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/features'
         self.BACKBONE_ROOT_DIR = Path(self.ROOT) / data['dataset_dir_name']
 
-        self.ANNOT_SAVE_DIR = f'{self.ANNOT_ROOT_DIR}/all-annotations'
-        self.IMAGE_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/image-level'
-        self.PLAYER_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/player-level'
+        self.ANNOT_SAVE_DIR = f'{self.ANNOT_ROOT_DIR}/all-annotations' if self.ENV == 'local' else ''
+        self.IMAGE_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/image-level' if self.ENV == 'local' else ''
+        self.PLAYER_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/player-level' if self.ENV == 'local' else ''
 
         self.LABELS = data['labels']
         self.ACTIONS = data['actions']
