@@ -16,7 +16,7 @@ class CONFIG:
         self.ANNOT_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/annotations'
         self.BALL_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_ball_annotation'
         self.TRACKING_ANNOTS_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_tracking_annotation' if self.ENV == 'local' else f'{self.DATASET_ROOT_DIR}/volleyball_tracking_annotation'
-        self.FEATURES_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/features' if self.ENV else f'{self.DATASET_ROOT_DIR}/features'
+        self.FEATURES_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/features' if self.ENV == 'local' else f'{self.DATASET_ROOT_DIR}/features'
         self.BACKBONE_ROOT_DIR = Path(self.ROOT) / data['dataset_dir_name']
 
         self.ANNOT_SAVE_DIR = f'{self.ANNOT_ROOT_DIR}/all-annotations'
