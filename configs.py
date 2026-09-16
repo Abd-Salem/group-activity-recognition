@@ -11,17 +11,27 @@ class CONFIG:
 
         self.ENV = data['environment']
         self.ROOT = data['roots'][self.ENV]
-        self.DATASET_ROOT_DIR = Path(self.ROOT) / data['dataset_dir_name']
-        self.VIDEO_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/videos' if self.ENV == 'local' else f'{self.DATASET_ROOT_DIR}/videos'
-        self.ANNOT_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/annotations'
-        self.BALL_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_ball_annotation'
-        self.TRACKING_ANNOTS_ROOT_DIR = f'{self.ANNOT_ROOT_DIR}/volleyball_tracking_annotation' if self.ENV == 'local' else f'{self.DATASET_ROOT_DIR}/volleyball_tracking_annotation'
-        self.FEATURES_ROOT_DIR = f'{self.DATASET_ROOT_DIR}/samples/features' if self.ENV == 'local' else f'{self.DATASET_ROOT_DIR}/features'
-        self.BACKBONE_ROOT_DIR = Path(self.ROOT) / data['dataset_dir_name']
 
-        self.ANNOT_SAVE_DIR = f'{self.ANNOT_ROOT_DIR}/all-annotations'
-        self.IMAGE_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/image-level'
-        self.PLAYER_LEVEL_DIR = f'{self.FEATURES_ROOT_DIR}/player-level'
+        if self.ENV == 'local':
+            self.DATASET_ROOT_DIR = Path(self.ROOT) / data['local_dataset_dir_name']
+            self.VIDEOS_DIR = Path(self.DATASET_ROOT_DIR) / f'samples/videos'
+            self.TRACKING_ANNOTS_DIR = Path(self.DATASET_ROOT_DIR) / f'annotation/volleyball_tracking_annotation'
+            self.BALL_ANNOT_DIR = Path(self.DATASET_ROOT_DIR) / f'volleyball_ball_annotation'
+            self.FEATURES_DIR = Path(self.DATASET_ROOT_DIR) / f'extracted_features'
+            self.ANNOT_SAVE_DIR = Path(self.ROOT) / f'saved_annotations'
+            self.BACKBONE_DIR = Path(self.ROOT) / f'backbones'
+
+        elif self.ENV == 'kaggle':
+            self.DATASET_ROOT_DIR = Path(self.ROOT) / data['kaggle_dataset_dir_name']
+            self.VIDEO_DIR = Path(self.DATASET_ROOT_DIR) / f'videos'
+            self.TRACKING_ANNOTS_DIR = Path(self.DATASET_ROOT_DIR) / f'volleyball_tracking_annotation'
+            self.BALL_ANNOT_DIR = Path(f'/kaggle/input/ball_annots')
+            self.FEATURES_DIR = Path(f'/kaggle/working/extracted_features')
+            self.ANNOT_SAVE_DIR = Path(f'/kaggel/working/saved_annotations')
+            self.BACKBONE_DIR = Path(f'/kaggel/working/backbones')
+
+        self.IMAGE_LEVEL_DIR = f'{self.FEATURES_DIR}/image-level'
+        self.PLAYER_LEVEL_DIR = f'{self.FEATURES_DIR}/player-level'
 
         self.LABELS = data['labels']
         self.ACTIONS = data['actions']
@@ -35,7 +45,7 @@ class CONFIG:
         self._create_dirs()
 
     def _create_dirs(self):
-        dirs = [self.FEATURES_ROOT_DIR,self.IMAGE_LEVEL_DIR, self.PLAYER_LEVEL_DIR ,self.ANNOT_SAVE_DIR, self.BACKBONE_ROOT_DIR]
+        dirs = [self.FEATURES_DIR,self.IMAGE_LEVEL_DIR, self.PLAYER_LEVEL_DIR ,self.ANNOT_SAVE_DIR, self.BACKBONE_DIR]
         for dir in dirs:
             os.makedirs(dir, exist_ok=True)
 

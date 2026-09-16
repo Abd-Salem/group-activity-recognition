@@ -3,11 +3,12 @@ environment: "kaggle"  # or "local"
 
 # environments' roots
 roots:
-    kaggle: "/kaggle/working"
+    kaggle: "/kaggle/input"
     local: "/home/abdallah_salem/projects/group-activity-recognition"
 
 # dir names
-dataset_dir_name : 'datasets'
+kaggle_dataset_dir_name : 'datasets/sherif31/group-activity-recognition-volleyball'
+local_dataset_dir_name : 'datasets'
 backbone_dir_name: 'baselines/backbones_checkpoints'
 
 # target frame index
