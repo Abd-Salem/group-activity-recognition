@@ -23,7 +23,7 @@ class CONFIG:
 
         elif self.ENV == 'kaggle':
             self.DATASET_ROOT_DIR = Path(self.ROOT) / data['kaggle_dataset_dir_name']
-            self.VIDEO_DIR = Path(self.DATASET_ROOT_DIR) / f'videos'
+            self.VIDEOS_DIR = Path(self.DATASET_ROOT_DIR) / f'videos'
             self.TRACKING_ANNOTS_DIR = Path(self.DATASET_ROOT_DIR) / f'volleyball_tracking_annotation'
             self.BALL_ANNOT_DIR = Path(f'/kaggle/input/ball_annots')
             self.FEATURES_DIR = Path(f'/kaggle/working/extracted_features')
