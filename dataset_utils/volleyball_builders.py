@@ -19,12 +19,12 @@ def load_volleyball_dataset(ball_info=False, config=None):
     # videos labels and frames information
     videos_annots = {}
 
-    videos_ids = os.listdir(config.VIDEO_ROOT_DIR)
+    videos_ids = os.listdir(config.VIDEOS_DIR)
     videos_ids.sort()
 
     # loop over split
     for _, vid_id in enumerate(videos_ids):
-        vid_dir_path = os.path.join(config.VIDEO_ROOT_DIR, vid_id)
+        vid_dir_path = os.path.join(config.VIDEOS_DIR, vid_id)
 
         # Only dir. (skip files)
         if not os.path.isdir(vid_dir_path):
@@ -51,8 +51,8 @@ def load_volleyball_dataset(ball_info=False, config=None):
             assert clip_id in clip_annot_dct
 
             # get frame box info & ball info
-            tracking_annot_path = os.path.join(config.TRACKING_ANNOTS_ROOT_DIR, vid_id, clip_id, f'{clip_id}.txt')
-            ball_path = os.path.join(config.BALL_ROOT_DIR, vid_id, f'{clip_id}.txt')  if ball_info else None
+            tracking_annot_path = os.path.join(config.TRACKING_ANNOTS_DIR, vid_id, clip_id, f'{clip_id}.txt')
+            ball_path = os.path.join(config.BALL_DIR, vid_id, f'{clip_id}.txt')  if ball_info else None
             frames_boxes = load_tracking_annotation(tracking_annot_path, ball_path)
 
             # group all annotation for each clip
@@ -129,7 +129,7 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
     clips, labels, clips_info = [], [], []
 
     for vid_id in split:
-        video_path = os.path.join(config.VIDEO_ROOT_DIR, vid_id)
+        video_path = os.path.join(config.VIDEOS_DIR, vid_id)
 
         if not os.path.isdir(video_path):
             continue

@@ -1,7 +1,6 @@
 import torch
 from torch.utils.data import Dataset
 from configs import CONFIG
-from torchvision import transforms
 from PIL import Image
 from datetime import datetime, timezone
 from abc import ABC, abstractmethod
