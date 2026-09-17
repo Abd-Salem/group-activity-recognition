@@ -15,7 +15,7 @@ class CONFIG:
         if self.ENV == 'local':
             self.DATASET_ROOT_DIR = Path(self.ROOT) / data['local_dataset_dir_name']
             self.VIDEOS_DIR = Path(self.DATASET_ROOT_DIR) / f'samples/videos'
-            self.TRACKING_ANNOTS_DIR = Path(self.DATASET_ROOT_DIR) / f'annotation/volleyball_tracking_annotation'
+            self.TRACKING_ANNOTS_DIR = Path(self.DATASET_ROOT_DIR) / f'annotations/volleyball_tracking_annotation'
             self.BALL_ANNOT_DIR = Path(self.DATASET_ROOT_DIR) / f'volleyball_ball_annotation'
             self.FEATURES_DIR = Path(self.DATASET_ROOT_DIR) / f'extracted_features'
             self.ANNOT_SAVE_DIR = Path(self.ROOT) / f'saved_annotations'

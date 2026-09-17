@@ -1,5 +1,5 @@
 # environment
-environment: "kaggle"  # or "local"
+environment: "local"  # or "local"
 
 # environments' roots
 roots:
@@ -8,7 +8,7 @@ roots:
 
 # dir names
 kaggle_dataset_dir_name : 'datasets/sherif31/group-activity-recognition-volleyball'
-local_dataset_dir_name : 'datasets'
+local_dataset_dir_name : 'dataset'
 backbone_dir_name: 'baselines/backbones_checkpoints'
 
 # target frame index
