@@ -39,6 +39,10 @@ class CONFIG:
         self.VAL_IDS = data['val_ids']
         self.TEST_IDS = data['test_ids']
         self.TARGET_FRAME_IDX = data['target_frame_idx']
+        self.BATCH_SIZE = data['batch_size']
+        self.OPTIMS = {'adam': torch.optim.Adam,
+                       'adamw': torch.optim.AdamW,
+                       'sgd' : torch.optim.SGD}
 
         self.CUSTOM_KEY = lambda x: (not x.isdigit(), int(x) if x.isdigit() else x)     # for dir sorting
 
