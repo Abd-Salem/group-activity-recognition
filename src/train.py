@@ -28,7 +28,7 @@ class BaseTrainer(ABC):
         self.patience = patience  # bad epochs allowed before early stop
         self.tol = tol            # minimum val loss drop that counts as an improvement
 
-    def _train_epoch(self) -> list:
+    def _train_epoch(self, test_case:bool=False) -> list:
         """Run one pass over the training set and return the loss of each batch."""
         self.model.train()  # enable dropout and batchnorm updates
         losses = []
@@ -41,10 +41,14 @@ class BaseTrainer(ABC):
             loss.backward()             # compute gradients
             self.optimizer.step()       # update parameters
             losses.append(loss.item())  # .item() detaches from the graph and frees memory
+
+            if test_case:
+                break
+
         return losses
 
     @torch.no_grad()  # no gradients needed, saves memory and time
-    def evaluate(self):
+    def evaluate(self, test_case=False):
         """Evaluate on the validation set.
 
         Returns: mean loss, accuracy, ground truth array, predictions array.
@@ -58,6 +62,10 @@ class BaseTrainer(ABC):
             # Move to CPU numpy, since sklearn and np.concatenate cannot take CUDA tensors
             preds.append(logits.argmax(dim=1).cpu().numpy())
             gt.append(label.cpu().numpy())
+
+            if test_case:   # if called for test
+                break
+
         # Join per-batch arrays into one array, so metrics are computed once
         gt, preds = np.concatenate(gt), np.concatenate(preds)
         return sum(losses) / len(losses), (gt == preds).mean(), gt, preds
@@ -74,15 +82,15 @@ class NonTemporalTrainer(BaseTrainer):
                          device, checkpoint_dir, patience=patience, tol=tol)
         self.model_name = model_name  # checkpoint file name without extension
 
-    def train(self, epochs: int = 50):
+    def train(self, epochs: int = 50, test_case:bool=False):
         best_loss, best_acc = float("inf"), 0.0
         bad_epochs = 0  # consecutive epochs without improvement
         ckpt = os.path.join(self.checkpoint_dir, f"{self.model_name}.pt")
 
         for epoch in range(epochs):
-            losses = self._train_epoch()
+            losses = self._train_epoch(test_case=test_case)
             train_loss = sum(losses) / len(losses)
-            val_loss, val_acc, _, _ = self.evaluate()
+            val_loss, val_acc, _, _ = self.evaluate(test_case=test_case)
 
             print(f"Epoch {epoch + 1}/{epochs} | train {train_loss:.4f} | "
                 f"val {val_loss:.4f} | acc {val_acc:.4f}")
