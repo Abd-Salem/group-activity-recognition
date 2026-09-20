@@ -4,7 +4,8 @@ from helper_utils.feature_extraction import get_processor
 from dataset_utils.volleyball_builders import load_clips_and_labels
 from torch.utils.data import DataLoader
 import torch.nn as nn
-import torch, Path
+import torch
+from pathlib import Path
 from baselines.backbones import NonTemporalBackbone
 from configs import CONFIG
 
