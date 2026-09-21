@@ -4,7 +4,7 @@ from helper_utils.feature_extraction import get_processor
 from dataset_utils.volleyball_builders import load_clips_and_labels
 from torch.utils.data import DataLoader
 import torch.nn as nn
-import torch
+import torch, math
 from pathlib import Path
 from baselines.backbones import NonTemporalBackbone
 from configs import CONFIG
@@ -41,7 +41,9 @@ def test_trainer():
         )
 
     loss, acc = trainer.train(epochs=1, test_case=True)
-    print(f'Loss: {loss}')
-    print(f'acc: {acc}')
+
+    assert math.isfinite(loss)
+    assert 0.0 <= acc <= 1.0
+    assert (config.TEST_DIR / 'test.pt').exists()
 
 

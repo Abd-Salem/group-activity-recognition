@@ -87,7 +87,7 @@ class NonTemporalTrainer(BaseTrainer):
         bad_epochs = 0  # consecutive epochs without improvement
         ckpt = os.path.join(self.checkpoint_dir, f"{self.model_name}.pt")
 
-        for epoch in range(epochs+1):
+        for epoch in range(epochs):
             losses = self._train_epoch(test_case=test_case)
             train_loss = sum(losses) / len(losses)
             val_loss, val_acc, _, _ = self.evaluate(test_case=test_case)
