@@ -41,5 +41,7 @@ def test_trainer():
         )
 
     loss, acc = trainer.train(epochs=1, test_case=True)
+    print(f'Loss: {loss}')
+    print(f'acc: {acc}')
 
 
