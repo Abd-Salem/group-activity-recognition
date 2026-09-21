@@ -53,5 +53,6 @@ class CONFIG:
         for dir in dirs:
             os.makedirs(dir, exist_ok=True)
 
+    @staticmethod
     def get_device() -> torch.device:
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
