@@ -20,6 +20,7 @@ class CONFIG:
             self.FEATURES_DIR = Path(self.DATASET_ROOT_DIR) / f'extracted_features'
             self.ANNOT_SAVE_DIR = Path(self.ROOT) / f'saved_annotations'
             self.BACKBONE_DIR = Path(self.ROOT) / f'backbones'
+            self.TEST_DIR = Path(self.ROOT) / f'test'
 
         elif self.ENV == 'kaggle':
             self.DATASET_ROOT_DIR = Path(self.ROOT) / data['kaggle_dataset_dir_name']
@@ -29,6 +30,7 @@ class CONFIG:
             self.FEATURES_DIR = Path(f'/kaggle/working/extracted_features')
             self.ANNOT_SAVE_DIR = Path(f'/kaggel/working/saved_annotations')
             self.BACKBONE_DIR = Path(f'/kaggel/working/backbones')
+            self.TEST_DIR = Path(f'/kaggel/working/test')
 
         self.IMAGE_LEVEL_DIR = f'{self.FEATURES_DIR}/image-level'
         self.PLAYER_LEVEL_DIR = f'{self.FEATURES_DIR}/player-level'
@@ -49,7 +51,7 @@ class CONFIG:
         self._create_dirs()
 
     def _create_dirs(self):
-        dirs = [self.FEATURES_DIR,self.IMAGE_LEVEL_DIR, self.PLAYER_LEVEL_DIR ,self.ANNOT_SAVE_DIR, self.BACKBONE_DIR]
+        dirs = [self.FEATURES_DIR,self.IMAGE_LEVEL_DIR, self.PLAYER_LEVEL_DIR ,self.ANNOT_SAVE_DIR, self.BACKBONE_DIR, self.TEST_DIR]
         for dir in dirs:
             os.makedirs(dir, exist_ok=True)
 
