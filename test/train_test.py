@@ -28,7 +28,6 @@ def test_trainer():
     model = NonTemporalBackbone(image_level=True)
     optimizer = config.OPTIMS['adamw'](model.parameters(), lr=1e-4)
     criterion = nn.CrossEntropyLoss()
-    ckpt = Path(config.ROOT) / 'test'
 
     trainer = NonTemporalTrainer(
         model=model,
@@ -37,7 +36,7 @@ def test_trainer():
         optimizer=optimizer,
         criterion=criterion,
         device=config.get_device(),
-        checkpoint_dir= ckpt,
+        checkpoint_dir= config.TEST_DIR,
         model_name='test'
         )
 
