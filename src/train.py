@@ -1,8 +1,8 @@
 from abc import ABC
-import os
 import numpy as np
-import torch
 import torch.nn as nn
+import torch, os
+import mlflow
 from torch.utils.data import DataLoader
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -48,7 +48,7 @@ class BaseTrainer(ABC):
         return losses
 
     @torch.no_grad()  # no gradients needed, saves memory and time
-    def evaluate(self, test_case=False):
+    def evaluate(self, test_case:bool=False):
         """Evaluate on the validation set.
 
         Returns: mean loss, accuracy, ground truth array, predictions array.
@@ -63,7 +63,7 @@ class BaseTrainer(ABC):
             preds.append(logits.argmax(dim=1).cpu().numpy())
             gt.append(label.cpu().numpy())
 
-            if test_case:   # if called for test
+            if test_case:   # if for testing get one batch and call it off
                 break
 
         # Join per-batch arrays into one array, so metrics are computed once
@@ -94,6 +94,16 @@ class NonTemporalTrainer(BaseTrainer):
 
             print(f"Epoch {epoch + 1}/{epochs} | train {train_loss:.4f} | "
                 f"val {val_loss:.4f} | acc {val_acc:.4f}")
+
+            if not test_case:
+                mlflow.log_metric(
+                    {
+                    'train_loss': train_loss,
+                    'val_loss' : val_loss,
+                    'val_acc' : val_acc
+                    },
+                    step=epoch
+                )
 
             # Improvement means val loss dropped by more than tol
             if  best_loss > val_loss + self.tol:
