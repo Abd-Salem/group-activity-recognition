@@ -1,6 +1,9 @@
 import os
 from configs import CONFIG
-from .volleyball_parsers import load_clip_annotation, load_tracking_annotation
+from dataset_utils.volleyball_parsers import load_clip_annotation, load_tracking_annotation
+from dataset_utils.volleyball_datasets import ImageLevelDataset
+from torch.utils.data import DataLoader
+from helper_utils.feature_extraction import get_processor
 
 
 def load_volleyball_dataset(ball_info=False, config=None):
@@ -166,3 +169,12 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
                 clips_info.append(clip_info)
 
     return clips, labels, clips_info
+
+
+
+def build_loader(config, split_name, ids, shuffle):
+    """Build an image-level DataLoader for the given split."""
+    processor = get_processor(full_image=True, split=split_name)
+    clips, labels, _ = load_clips_and_labels(split=ids, image_level=True, config=config)
+    dataset = ImageLevelDataset(paths=clips, labels=labels, processor=processor, temporal=False)
+    return DataLoader(dataset=dataset, batch_size=config.BATCH_SIZE[1], shuffle=shuffle)
