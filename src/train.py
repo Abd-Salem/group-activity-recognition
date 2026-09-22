@@ -104,6 +104,7 @@ class NonTemporalTrainer(BaseTrainer):
                     },
                     step=epoch
                 )
+                
 
             # Improvement means val loss dropped by more than tol
             if  best_loss > val_loss + self.tol:
