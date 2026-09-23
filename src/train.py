@@ -31,6 +31,19 @@ class BaseTrainer(ABC):
     def _train_epoch(self, test_case:bool=False) -> list:
         """Run one pass over the training set and return the loss of each batch."""
         self.model.train()  # enable dropout and batchnorm updates
+
+        # if run for a test case
+        if test_case:
+            frame ,label = next(iter(self.train_loader))
+            frame, label = frame.to(self.device), label.to(self.device)
+            loss = self.criterion(self.model(frame), label)
+
+            self.optimizer.zero_grad()  # clear gradients from the previous step
+            loss.backward()             # compute gradients
+            self.optimizer.step()       # update parameters
+            return loss.item()
+
+
         losses = []
         for frame, label in self.train_loader:
             # Data must be moved every batch, unlike the model
@@ -42,9 +55,6 @@ class BaseTrainer(ABC):
             self.optimizer.step()       # update parameters
             losses.append(loss.item())  # .item() detaches from the graph and frees memory
 
-            if test_case:
-                break
-
         return losses
 
     @torch.no_grad()  # no gradients needed, saves memory and time
@@ -54,6 +64,18 @@ class BaseTrainer(ABC):
         Returns: mean loss, accuracy, ground truth array, predictions array.
         """
         self.model.eval()  # disable dropout, use batchnorm running stats
+
+        # if run for a test case
+        if test_case:
+            frame, label = next(iter(self.validate_loader))
+            frame, label = frame.to(self.device), label.to(self.device)
+            logits = self.model(frame)
+            loss = self.criterion(logits, label).item()
+            pred = logits.armax(dim=1).cpu().numpy()
+
+            return loss, pred, label.cpu().numpy()
+
+
         losses, gt, preds = [], [], []
         for frame, label in self.validate_loader:
             frame, label = frame.to(self.device), label.to(self.device)
@@ -62,9 +84,6 @@ class BaseTrainer(ABC):
             # Move to CPU numpy, since sklearn and np.concatenate cannot take CUDA tensors
             preds.append(logits.argmax(dim=1).cpu().numpy())
             gt.append(label.cpu().numpy())
-
-            if test_case:   # if for testing get one batch and call it off
-                break
 
         # Join per-batch arrays into one array, so metrics are computed once
         gt, preds = np.concatenate(gt), np.concatenate(preds)
@@ -126,7 +145,7 @@ class NonTemporalTrainer(BaseTrainer):
         labels: class indices, target_names: class names in the same order.
         """
         _, _, gt, preds = self.evaluate()
-        # labels pins all classes, so a class missing from the split does not break the report
+        # labels pins all classes, so a class missing from the s/plit does not break the report
         # zero_division=0 avoids warnings for classes that are never predicted
         class_rep = classification_report(gt, preds, labels=labels,
                                           target_names=target_names, zero_division=0)
