@@ -1,12 +1,9 @@
 from src.train import NonTemporalTrainer
-from dataset_utils.volleyball_datasets import ImageLevelDataset
-from helper_utils.feature_extraction import get_processor
-from dataset_utils.volleyball_builders import load_clips_and_labels
-from torch.utils.data import DataLoader
-import torch.nn as nn
-import math, pytest
+from dataset_utils.volleyball_builders import build_loader
 from baselines.backbones import NonTemporalBackbone
 from configs import CONFIG
+import torch.nn as nn
+import math, pytest
 
 
 
@@ -17,22 +14,15 @@ def config():
     return CONFIG()
 
 
-def _build_loader(config, split_name, ids, shuffle):
-    """Build an image-level DataLoader for the given split."""
-    processor = get_processor(full_image=True, split=split_name)
-    clips, labels, _ = load_clips_and_labels(split=ids, image_level=True, config=config)
-    dataset = ImageLevelDataset(paths=clips, labels=labels, processor=processor, temporal=False)
-    return DataLoader(dataset=dataset, batch_size=config.BATCH_SIZE[1], shuffle=shuffle)
-
 
 @pytest.fixture(scope="module")
 def train_loader(config):
-    return _build_loader(config, 'train', config.TRAIN_IDS, shuffle=True)
+    return build_loader(config, 'train', config.TRAIN_IDS, shuffle=True)
 
 
 @pytest.fixture(scope="module")
 def val_loader(config):
-    return _build_loader(config, 'val', config.VAL_IDS, shuffle=False)
+    return build_loader(config, 'val', config.VAL_IDS, shuffle=False)
 
 
 def test_trainer(config, train_loader, val_loader):
