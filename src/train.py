@@ -55,7 +55,7 @@ class BaseTrainer(ABC):
             self.optimizer.step()       # update parameters
             losses.append(loss.item())  # .item() detaches from the graph and frees memory
 
-        return losses
+        return sum(losses) / len(losses)
 
     @torch.no_grad()  # no gradients needed, saves memory and time
     def evaluate(self, test_case:bool=False):
@@ -107,8 +107,7 @@ class NonTemporalTrainer(BaseTrainer):
         ckpt = os.path.join(self.checkpoint_dir, f"{self.model_name}.pt")
 
         for epoch in range(epochs):
-            losses = self._train_epoch(test_case=test_case)
-            train_loss = sum(losses) / len(losses)
+            train_loss = self._train_epoch(test_case=test_case)
             val_loss, val_acc, _, _ = self.evaluate(test_case=test_case)
 
             print(f"Epoch {epoch + 1}/{epochs} | train {train_loss:.4f} | "
