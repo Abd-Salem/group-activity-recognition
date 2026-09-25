@@ -71,7 +71,7 @@ class BaseTrainer(ABC):
             frame, label = frame.to(self.device), label.to(self.device)
             logits = self.model(frame)
             loss = self.criterion(logits, label).item()
-            pred = logits.armax(dim=1).cpu().numpy()
+            pred = logits.argmax(dim=1).cpu().numpy()
 
             return loss, pred, label.cpu().numpy()
 
