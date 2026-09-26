@@ -73,7 +73,7 @@ class BaseTrainer(ABC):
             loss = self.criterion(logits, label).item()
             pred = logits.argmax(dim=1).cpu().numpy()
 
-            return loss, pred, label.cpu().numpy()
+            return loss, pred, None, None
 
 
         losses, gt, preds = [], [], []
@@ -114,11 +114,11 @@ class NonTemporalTrainer(BaseTrainer):
                 f"val {val_loss:.4f} | acc {val_acc:.4f}")
 
             if not test_case:
-                mlflow.log_metric(
+                mlflow.log_metrics(
                     {
-                    'train_loss': train_loss,
-                    'val_loss' : val_loss,
-                    'val_acc' : val_acc
+                        'train_loss': train_loss,
+                        'val_loss' : val_loss,
+                        'val_acc' : val_acc
                     },
                     step=epoch
                 )
@@ -128,6 +128,11 @@ class NonTemporalTrainer(BaseTrainer):
             if  best_loss > val_loss + self.tol:
                 best_loss, best_acc, bad_epochs = val_loss, val_acc, 0
                 torch.save(self.model.state_dict(), ckpt)
+
+                mlflow.log_metrics({
+                    'best_loss' : best_loss,
+                    'best_acc' : best_acc
+                }, step=epoch)
             else:
                 bad_epochs += 1
                 if bad_epochs >= self.patience:
@@ -136,6 +141,7 @@ class NonTemporalTrainer(BaseTrainer):
 
         # Restore the best weights, not the last epoch's
         self.model.load_state_dict(torch.load(ckpt, map_location=self.device))
+        mlflow.log_artifact(ckpt)
         return best_loss, best_acc
 
     def report(self, labels, target_names):
