@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from configs import CONFIG
+from group_activity_recognition.configs import CONFIG
 from PIL import Image
 from datetime import datetime, timezone
 from abc import ABC, abstractmethod

@@ -1,9 +1,9 @@
-from configs import CONFIG
+from group_activity_recognition.configs import CONFIG
 from PIL import Image
 import os, torch
-from dataset_utils.volleyball_datasets import PersonLevelDataset, ImageLevelDataset
-from dataset_utils.volleyball_builders import load_clips_and_labels
-from helper_utils.feature_extraction import get_processor
+from group_activity_recognition.dataset_utils.volleyball_datasets import PersonLevelDataset, ImageLevelDataset
+from group_activity_recognition.dataset_utils.volleyball_builders import load_clips_and_labels
+from group_activity_recognition.helper_utils.feature_extraction import get_processor
 from torch.utils.data import DataLoader
 import pytest
 

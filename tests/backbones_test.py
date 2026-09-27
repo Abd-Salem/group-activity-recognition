@@ -1,5 +1,5 @@
 import torch, pytest
-from baselines.backbones import NonTemporalBackbone, TemporalBackbone
+from group_activity_recognition.baselines.backbones import NonTemporalBackbone, TemporalBackbone
 
 
 

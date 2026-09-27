@@ -1,6 +1,6 @@
-from volleyball_builders import load_tracking_annotation
+from group_activity_recognition.dataset_utils.volleyball_builders import load_tracking_annotation
 import cv2, os
-from configs import CONFIG
+from group_activity_recognition.configs import CONFIG
 
 
 

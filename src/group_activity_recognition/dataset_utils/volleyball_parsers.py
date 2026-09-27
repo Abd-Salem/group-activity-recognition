@@ -1,4 +1,4 @@
-from helper_utils.frame_box_info import BoxInfo, FrameInfo
+from group_activity_recognition.helper_utils.frame_box_info import BoxInfo, FrameInfo
 
 
 def load_tracking_annotation(annot_path, ball_path=None):

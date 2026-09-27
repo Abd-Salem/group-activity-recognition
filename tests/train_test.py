@@ -1,7 +1,7 @@
-from src.train import NonTemporalTrainer
-from dataset_utils.volleyball_builders import build_loader
-from baselines.backbones import NonTemporalBackbone
-from configs import CONFIG
+from group_activity_recognition.trainer import NonTemporalTrainer
+from group_activity_recognition.dataset_utils.volleyball_builders import build_loader
+from group_activity_recognition.baselines.backbones import NonTemporalBackbone
+from group_activity_recognition.configs import CONFIG
 import torch.nn as nn
 import math, pytest
 

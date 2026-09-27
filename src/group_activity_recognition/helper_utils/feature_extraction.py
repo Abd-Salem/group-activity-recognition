@@ -4,8 +4,8 @@ import numpy as np
 from torchvision import transforms
 from PIL import Image
 from torchvision.models import resnet50, ResNet50_Weights
-from configs import  CONFIG
-from dataset_utils.volleyball_parsers import load_tracking_annotation
+from group_activity_recognition.configs import  CONFIG
+from group_activity_recognition.dataset_utils.volleyball_parsers import load_tracking_annotation
 
 
 #   videos_annots['video_num']['clip_num']  -> frames_boxes dct contain each frame info  & annotations
