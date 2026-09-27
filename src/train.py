@@ -72,8 +72,10 @@ class BaseTrainer(ABC):
             logits = self.model(frame)
             loss = self.criterion(logits, label).item()
             preds = logits.argmax(dim=1).cpu().numpy()
+            label = label.cpu().numpy()
 
-            return loss, preds, None, None
+
+            return loss, (label == preds).mean(), label, preds
 
 
         losses, gt, preds = [], [], []
