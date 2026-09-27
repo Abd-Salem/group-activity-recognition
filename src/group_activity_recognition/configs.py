@@ -13,7 +13,7 @@ class CONFIG:
         return cls._instance
     
 
-    def __init__(self, path='../configs/configs.yml'):
+    def __init__(self, path='configs.yml'):
         with open(path, 'r') as file:
             data = yaml.safe_load(file)
 
