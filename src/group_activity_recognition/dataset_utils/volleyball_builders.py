@@ -1,9 +1,8 @@
 import os
-from group_activity_recognition.configs import CONFIG
+from torch.utils.data import DataLoader
 from group_activity_recognition.dataset_utils.volleyball_parsers import load_clip_annotation, load_tracking_annotation
 from group_activity_recognition.dataset_utils.volleyball_datasets import ImageLevelDataset
-from torch.utils.data import DataLoader
-from group_activity_recognition.helper_utils.feature_extraction import get_processor
+from group_activity_recognition.helper_utils.more_helpers import get_processor, get_config
 
 
 def load_volleyball_dataset(ball_info=False, config=None):
@@ -16,7 +15,7 @@ def load_volleyball_dataset(ball_info=False, config=None):
     '''
 
     if config is None:
-        config = CONFIG()
+        config = get_config()
 
 
     # videos labels and frames information
@@ -114,7 +113,7 @@ def handle_corrupted_dataset():
 
     return clean_videos, corruption_logs
 
-def load_clips_and_labels(split:list, image_level=True, config=None):
+def load_clips_and_labels(split_name:str='train',image_level:bool=True, config=None) -> tuple[list, list, list]:
     '''
     align clips paths with their labels
     :param split: train, val, test
@@ -123,8 +122,20 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
     :return: clips, labels, clips info (if crops)
     '''
 
+    if split_name.lower() not in ['train', 'val', 'test']:
+        raise ValueError(f'Invalid split type: {split_name}')
+
     if config is None:
-        config = CONFIG()
+        config = get_config()
+
+    # get ids
+    if split_name == 'val':
+        split = config.VAL_IDS
+    elif split_name == 'test':
+        split = config.TEST_IDS
+    else:
+        split = config.TRAIN_IDS
+        
 
 
     videos_annots = load_volleyball_dataset(ball_info=False, config=config)
@@ -172,9 +183,9 @@ def load_clips_and_labels(split:list, image_level=True, config=None):
 
 
 
-def build_loader(config, split_name, ids, shuffle):
+def build_loader(config, split_name:str, shuffle:bool):
     """Build an image-level DataLoader for the given split."""
     processor = get_processor(full_image=True, split=split_name)
-    clips, labels, _ = load_clips_and_labels(split=ids, image_level=True, config=config)
+    clips, labels, _ = load_clips_and_labels(split=split_name, image_level=True, config=config)
     dataset = ImageLevelDataset(paths=clips, labels=labels, processor=processor, temporal=False)
     return DataLoader(dataset=dataset, batch_size=config.BATCH_SIZE[1], shuffle=shuffle)
