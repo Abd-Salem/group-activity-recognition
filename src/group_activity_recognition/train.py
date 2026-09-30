@@ -1,0 +1,41 @@
+import mlflow
+import torch.nn as nn
+from group_activity_recognition.trainer import NonTemporalTrainer
+from group_activity_recognition.dataset_utils.volleyball_builders import build_loader
+from group_activity_recognition.baselines.backbones import NonTemporalBackbone
+from group_activity_recognition.helper_utils.mlflow_utils import start_run
+from group_activity_recognition.helper_utils.more_helpers import get_config
+
+
+def train_with_mlflow():
+    config = get_config()
+    with start_run(tracking_uri=None, experiment_name='Backbone', run_name='Non_tmp_backbone'):
+        params = {'lr': config.LR[0], 'n_epochs': config.N_EPOCHS[1]}
+        mlflow.log_params(params)
+        mlflow.set_tags(
+            {
+                'model_part' : 'Backbone',
+                'model_type' : 'Non-Temporal',
+                'dataset'    : 'version 1.0',
+                'stage'      : 'experiment'
+            }
+        )
+        device = config.get_device()
+        model = NonTemporalBackbone(image_level=True).to(device=device)
+        optimizer = config.OPTIMS['adamw'](model.parameters(), lr=params['lr'])
+        criterion = nn.CrossEntropyLoss()
+
+        train_loader = build_loader(config=config, split_name='train', shuffle=True)
+        val_loader = build_loader(config=config, spilt_name='val', shuffle=False)
+
+        trainer = NonTemporalTrainer(
+            model=model,
+            train_loader=train_loader,
+            validate_loader=val_loader,
+            optimizer=optimizer,
+            criterion=criterion,
+            device=device,
+            checkpoint_dir=config.CHECKPOINT_DIR,
+            model_name='Non-Tmp-Backbone'
+        )
+        loss, acc = trainer.train(epochs=params['n_epochs'])
