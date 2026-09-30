@@ -186,6 +186,6 @@ def load_clips_and_labels(split_name:str='train',image_level:bool=True, config=N
 def build_loader(config, split_name:str, shuffle:bool):
     """Build an image-level DataLoader for the given split."""
     processor = get_processor(full_image=True, split=split_name)
-    clips, labels, _ = load_clips_and_labels(split=split_name, image_level=True, config=config)
+    clips, labels, _ = load_clips_and_labels(split_name=split_name, image_level=True, config=config)
     dataset = ImageLevelDataset(paths=clips, labels=labels, processor=processor, temporal=False)
     return DataLoader(dataset=dataset, batch_size=config.BATCH_SIZE[1], shuffle=shuffle)
