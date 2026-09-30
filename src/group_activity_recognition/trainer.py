@@ -2,6 +2,7 @@ from abc import ABC
 import numpy as np
 import torch.nn as nn
 import torch, os
+import time
 import mlflow
 from torch.utils.data import DataLoader
 from sklearn.metrics import classification_report, confusion_matrix
@@ -103,13 +104,16 @@ class NonTemporalTrainer(BaseTrainer):
                          device, checkpoint_dir, patience=patience, tol=tol)
         self.model_name = model_name  # checkpoint file name without extension
 
-    def train(self, epochs: int = 50, test_case:bool=False):
+    def train(self, epochs:int=50, test_case:bool=False):
         best_loss, best_acc = float("inf"), 0.0
         bad_epochs = 0  # consecutive epochs without improvement
         ckpt = os.path.join(self.checkpoint_dir, f"{self.model_name}.pt")
 
+        train_t0 = time.perf_counter()
         for epoch in range(epochs):
+            epoch_t0 = time.perf_counter()
             train_loss = self._train_epoch(test_case=test_case)
+            epoch_time = time.perf_counter() - epoch_t0
             val_loss, val_acc, _, _ = self.evaluate(test_case=test_case)
 
             print(f"Epoch {epoch + 1}/{epochs} | train {train_loss:.4f} | "
@@ -118,9 +122,10 @@ class NonTemporalTrainer(BaseTrainer):
             if not test_case:
                 mlflow.log_metrics(
                     {
-                        'train_loss': train_loss,
-                        'val_loss' : val_loss,
-                        'val_acc' : val_acc
+                        'Epoch Train Loss': train_loss,
+                        'Epoch Val Loss' : val_loss,
+                        'Epoch val acc' : val_acc,
+                        'epoch Duration' : epoch_time
                     },
                     step=epoch
                 )
@@ -132,8 +137,8 @@ class NonTemporalTrainer(BaseTrainer):
                 torch.save(self.model.state_dict(), ckpt)
 
                 mlflow.log_metrics({
-                    'best_loss' : best_loss,
-                    'best_acc' : best_acc
+                    'Best Loss' : best_loss,
+                    'Best Acc' : best_acc
                 }, step=epoch)
             else:
                 bad_epochs += 1
@@ -141,6 +146,8 @@ class NonTemporalTrainer(BaseTrainer):
                     print(f"Early stop at epoch {epoch + 1}")
                     break
 
+        train_time = time.perf_counter() - train_t0
+        mlflow.log_metric('Duration', train_time)
         # Restore the best weights, not the last epoch's
         self.model.load_state_dict(torch.load(ckpt, map_location=self.device))
         mlflow.log_artifact(ckpt)
