@@ -5,7 +5,7 @@ from group_activity_recognition.dataset_utils.volleyball_datasets import ImageLe
 from group_activity_recognition.helper_utils.more_helpers import get_processor, get_config
 
 
-def load_volleyball_dataset(ball_info=False, config=None):
+def load_volleyball_dataset(ball_info:bool=False, config=None) -> dict:
     '''
     loading players boxes info, players annotations, clips' labels and clips' paths in dict
 
