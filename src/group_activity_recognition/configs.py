@@ -32,6 +32,7 @@ class CONFIG:
             self.ANNOT_SAVE_DIR = Path(self.ROOT) / f'saved_annotations'
             self.BACKBONE_DIR = Path(self.ROOT) / f'backbones'
             self.TEST_DIR = Path(self.ROOT) / f'test'
+            self.CHECKPOINT_DIR = Path(self.ROOT) / f'checkpiont'
 
         elif self.ENV == 'kaggle':
             self.DATASET_ROOT_DIR = Path(self.ROOT) / data['kaggle_dataset_dir_name']
@@ -41,11 +42,15 @@ class CONFIG:
             self.FEATURES_DIR = Path(f'/kaggle/working/extracted_features')
             self.ANNOT_SAVE_DIR = Path(f'/kaggel/working/saved_annotations')
             self.BACKBONE_DIR = Path(f'/kaggel/working/backbones')
-            self.TEST_DIR = Path(f'/kaggel/working/test')
+            self.TEST_DIR = Path('/kaggel/working/test')
+            self.CHECKPOINT_DIR = Path('/kaggel/working/checkpoint')
 
         self.IMAGE_LEVEL_DIR = f'{self.FEATURES_DIR}/image-level'
         self.PLAYER_LEVEL_DIR = f'{self.FEATURES_DIR}/player-level'
 
+        self.TRACKING_URI = data['mlflow']['tracking_uri']
+        self.EXP_NAME = data['mlflow']['experiment_name']
+        self.REG_MODEL_NAME = data['mlflow']['register_model_name']
         self.LABELS = data['labels']
         self.ACTIONS = data['actions']
         self.TRAIN_IDS = data['train_ids']
@@ -53,6 +58,8 @@ class CONFIG:
         self.TEST_IDS = data['test_ids']
         self.TARGET_FRAME_IDX = data['target_frame_idx']
         self.BATCH_SIZE = data['batch_size']
+        self.LR = data['learning_rate']
+        self.N_EPOCHS = data['epochs']
         self.OPTIMS = {'adam': torch.optim.Adam,
                        'adamw': torch.optim.AdamW,
                        'sgd' : torch.optim.SGD}
