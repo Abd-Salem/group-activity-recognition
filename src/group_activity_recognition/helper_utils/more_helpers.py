@@ -180,8 +180,9 @@ def extract_features(model, full_image=False, config=None):
 
 
 if __name__ == '__main__':
-    check()         # versions and machines
+    # check()         # versions and machines
     config = get_config()
-    full_image = False      # full frame or crops
-    model = load_extractor_for_test()        # resnet50 pretrained model
-    extract_features(model, full_image=full_image, config=config)   # extract features and save them
+    # full_image = False      # full frame or crops
+    # model = load_extractor_for_test()        # resnet50 pretrained model
+    # extract_features(model, full_image=full_image, config=config)   # extract features and save them
+    print(type(config.LR[0]))
