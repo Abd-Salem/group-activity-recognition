@@ -9,6 +9,7 @@ from group_activity_recognition.helper_utils.more_helpers import get_config
 
 def train_with_mlflow():
     config = get_config()
+    print('Training Non Temp Backbone model')
     with start_run(tracking_uri=None, experiment_name='Backbone', run_name='Non_tmp_backbone'):
         params = {'lr': config.LR[0], 'n_epochs': config.N_EPOCHS[1]}
         mlflow.log_params(params)
