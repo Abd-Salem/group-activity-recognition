@@ -1,5 +1,5 @@
 from group_activity_recognition.dataset_utils.volleyball_builders import load_volleyball_dataset
-from group_activity_recognition.configs import CONFIG
+from group_activity_recognition.helper_utils.more_helpers import get_config
 import os, pickle
 
 def save_annotations(ball_info=False, config=None):
@@ -8,7 +8,7 @@ def save_annotations(ball_info=False, config=None):
     :param ball_info: get or ignore ball information
     '''
     if config is None:
-        config = CONFIG()
+        config = get_config()
 
     videos_annots = load_volleyball_dataset(ball_info=ball_info)
 
@@ -25,7 +25,7 @@ def load_annotations(config=None):
     '''
 
     if config is None:
-        config = CONFIG()
+        config = get_config()
 
     save_file = f'{config.ANNOT_SAVE_DIR}/annots.pickle'
     with open(save_file, 'rb') as file:

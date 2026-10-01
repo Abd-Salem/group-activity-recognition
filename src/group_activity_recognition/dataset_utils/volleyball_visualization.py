@@ -1,6 +1,6 @@
 from group_activity_recognition.dataset_utils.volleyball_builders import load_tracking_annotation
 import cv2, os
-from group_activity_recognition.configs import CONFIG
+from group_activity_recognition.helper_utils.more_helpers import get_config
 
 
 
@@ -34,7 +34,7 @@ def visualize_clips(player_annot, video_frames, ball_annot=''):
 
 
 if __name__ == '__main__':
-    config = CONFIG()
+    config = get_config()
     # testing case
     player_annot = f'{config.TRACKING_ANNOTS_ROOT_DIR}/7/51725/51725.txt'
     ball_annot = f'{config.BALL_ROOT_DIR}/7/51725.txt'

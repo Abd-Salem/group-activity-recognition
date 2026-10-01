@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from group_activity_recognition.configs import CONFIG
+from group_activity_recognition.helper_utils.more_helpers import get_config
 from PIL import Image
 from datetime import datetime, timezone
 from abc import ABC, abstractmethod
@@ -41,7 +41,7 @@ class PersonLevelDataset(VolleyballDatasetBase):
     def __init__(self, paths, labels ,processor, temporal=True, clips_info=None, config=None):
         super().__init__()
 
-        self.config = CONFIG() if config is None else config
+        self.config = get_config() if config is None else config
         self.paths = paths
         self.labels = [torch.tensor(self.config.LABELS[l], dtype=torch.long) for l in labels]
         self.processor = processor
@@ -93,7 +93,7 @@ class ImageLevelDataset(VolleyballDatasetBase):
     def __init__(self, paths, labels, processor, temporal=True, config=None):
         super().__init__()
 
-        self.config = CONFIG() if config is None else config
+        self.config = get_config() if config is None else config
         self.paths = paths
         self.labels = [torch.tensor(self.config.LABELS[l], dtype=torch.long) for l in labels]
         self.processor = processor

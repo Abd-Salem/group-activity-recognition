@@ -61,6 +61,3 @@ mlflow:
     tracking_uri : 'http://localhost:5000'
     experiment_name: 'volleyball-model'
     register_model_name : 'volleyballModel'
-
-
-
