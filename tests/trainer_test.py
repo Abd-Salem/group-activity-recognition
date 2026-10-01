@@ -43,7 +43,7 @@ def test_trainer(config, train_loader, val_loader):
         model_name='test'
     )
 
-    loss, acc = trainer.train(epochs=config.N_EPOCH[0], test_case=True)
+    loss, acc = trainer.train(epochs=config.N_EPOCHS[0], test_case=True)
 
     assert math.isfinite(loss)
     assert 0.0 <= acc <= 1.0
