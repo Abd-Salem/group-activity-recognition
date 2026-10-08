@@ -44,3 +44,7 @@ def train_with_mlflow():
         mlflow.log_metrics({'final_loss': loss, 'final_acc': acc})
         run = mlflow.active_run()
         print(f"{mlflow.get_tracking_uri()}/#/experiments/{run.info.experiment_id}/runs/{run.info.run_id}")
+
+
+if __name__ == '__main__':
+    train_with_mlflow()
