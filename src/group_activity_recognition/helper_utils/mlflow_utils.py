@@ -1,6 +1,6 @@
 import mlflow
 import os
-from group_activity_recognition.configs import get_config
+from group_activity_recognition.helper_utils.more_helpers import get_config
 
 
 def start_run(tracking_uri=None, experiment_name=None, run_name=None):
