@@ -86,7 +86,7 @@ def dataset_loader():
         config = CONFIG()
         processor = get_processor(full_image=full_image)
         clips, labels, clips_info = load_clips_and_labels(
-            split=config.TRAIN_IDS, image_level=full_image, config=config
+            split_name='train', image_level=full_image, config=config
         )
 
         if full_image:
