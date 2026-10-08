@@ -40,3 +40,7 @@ def train_with_mlflow():
             model_name='Non-Tmp-Backbone'
         )
         loss, acc = trainer.train(epochs=params['n_epochs'])
+
+        mlflow.log_metrics({'final_loss': loss, 'final_acc': acc})
+        run = mlflow.active_run()
+        print(f"{mlflow.get_tracking_uri()}/#/experiments/{run.info.experiment_id}/runs/{run.info.run_id}")
