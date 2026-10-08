@@ -27,7 +27,7 @@ def train_with_mlflow():
         criterion = nn.CrossEntropyLoss()
 
         train_loader = build_loader(config=config, split_name='train', shuffle=True)
-        val_loader = build_loader(config=config, spilt_name='val', shuffle=False)
+        val_loader = build_loader(config=config, split_name='val', shuffle=False)
 
         trainer = NonTemporalTrainer(
             model=model,
