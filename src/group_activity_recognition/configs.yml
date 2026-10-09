@@ -58,7 +58,9 @@ epochs : [1, 5, 20, 30, 50]
 
 # mlflow
 mlflow:
+    tracking_flag: 'dagshub'       # or local or kaggle
     tracking_uri_local : 'http://localhost:5000'
     tracking_uri_kaggle : 'sqlite:////kaggle/working/mlflow.db'
+    tracking_uri_dagshub: 'https://dagshub.com/Abd-Salem/group-activity-recognition.mlflow'
     experiment_name: 'volleyball-model'
     register_model_name : 'volleyballModel'

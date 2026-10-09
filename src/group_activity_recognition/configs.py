@@ -33,7 +33,6 @@ class CONFIG:
             self.BACKBONE_DIR = Path(self.ROOT) / f'backbones'
             self.TEST_DIR = Path(self.ROOT) / f'test'
             self.CHECKPOINT_DIR = Path(self.ROOT) / f'checkpiont'
-            self.TRACKING_URI = data['mlflow']['tracking_uri_local']
 
         elif self.ENV == 'kaggle':
             self.DATASET_ROOT_DIR = Path(self.ROOT) / data['kaggle_dataset_dir_name']
@@ -45,7 +44,14 @@ class CONFIG:
             self.BACKBONE_DIR = Path(f'/kaggel/working/backbones')
             self.TEST_DIR = Path('/kaggel/working/test')
             self.CHECKPOINT_DIR = Path('/kaggel/working/checkpoint')
+
+        # set tracking uri according to flag value
+        if data['mlflow']['tracking_flag'] == 'dagshub':
+            self.TRACKING_URI = data['mlflow']['tracking_uri_dagshub']
+        elif data['mlflow']['tracking_flag'] == 'kaggle':
             self.TRACKING_URI = data['mlflow']['tracking_uri_kaggle']
+        else:
+            self.TRACKING_URI = data['mlflow']['tracking_uri_local']
 
         self.IMAGE_LEVEL_DIR = f'{self.FEATURES_DIR}/image-level'
         self.PLAYER_LEVEL_DIR = f'{self.FEATURES_DIR}/player-level'
