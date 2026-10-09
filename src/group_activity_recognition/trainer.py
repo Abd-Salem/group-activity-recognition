@@ -116,8 +116,8 @@ class NonTemporalTrainer(BaseTrainer):
             epoch_time = time.perf_counter() - epoch_t0
             val_loss, val_acc, _, _ = self.evaluate(test_case=test_case)
 
-            print(f"Epoch {epoch + 1}/{epochs} | train {train_loss:.4f} | "
-                f"val {val_loss:.4f} | acc {val_acc:.4f}")
+            print(f"Epoch {epoch + 1}/{epochs} | train_loss {train_loss:.4f} | "
+                f"val_loss {val_loss:.4f} | acc {val_acc:.4f}")
 
             if not test_case:
                 mlflow.log_metrics(
