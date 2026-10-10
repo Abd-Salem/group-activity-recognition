@@ -1,4 +1,4 @@
-from group_activity_recognition.configs import CONFIG
+from group_activity_recognition.helper_utils.more_helpers import get_config
 from PIL import Image
 import os, torch
 from group_activity_recognition.dataset_utils.volleyball_datasets import PersonLevelDataset, ImageLevelDataset
@@ -19,7 +19,7 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
     :return: False, list of issues if there are some issues found
     '''
     if config is None:
-        config = CONFIG()
+        config = get_config()
 
     issues = []
 
@@ -83,7 +83,7 @@ def validate_volleyball_dataset(clips, labels, image_level=True, clips_info=None
 def dataset_loader():
     '''returns a function to build a person or image level dataset loader, temporal or not'''
     def _make_loader(temporal=True, full_image=True):
-        config = CONFIG()
+        config = get_config()
         processor = get_processor(full_image=full_image)
         clips, labels, clips_info = load_clips_and_labels(
             split_name='train', image_level=full_image, config=config
