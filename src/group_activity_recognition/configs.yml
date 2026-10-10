@@ -1,5 +1,5 @@
 # environment
-environment: "kaggle"  # or "local"
+environment: "local"  # or "local"
 
 # envs' roots
 roots:
