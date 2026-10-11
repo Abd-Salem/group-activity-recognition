@@ -1,10 +1,11 @@
 # environment
-environment: "local"  # or "local"
+environment: "github"  # or "local" or "kaggle"
 
 # envs' roots
 roots:
     kaggle: "/kaggle/input"
     local: "/home/abdallah_salem/projects/group-activity-recognition"
+    github: ./outputs
 
 # dir names
 kaggle_dataset_dir_name : 'datasets/sherif31/group-activity-recognition-volleyball'

@@ -45,6 +45,18 @@ class CONFIG:
             self.TEST_DIR = Path('/kaggel/working/test')
             self.CHECKPOINT_DIR = Path('/kaggel/working/checkpoint')
 
+        elif self.ENV == 'github':
+            self.DATASET_ROOT_DIR = Path(self.ROOT) / data['local_dataset_dir_name']
+            self.VIDEOS_DIR = Path(self.DATASET_ROOT_DIR) / f'samples/videos'
+            self.TRACKING_ANNOTS_DIR = Path(self.DATASET_ROOT_DIR) / f'annotations/volleyball_tracking_annotation'
+            self.BALL_ANNOT_DIR = Path(self.DATASET_ROOT_DIR) / f'volleyball_ball_annotation'
+            self.FEATURES_DIR = Path(self.DATASET_ROOT_DIR) / f'extracted_features'
+            self.ANNOT_SAVE_DIR = Path(self.ROOT) / f'saved_annotations'
+            self.BACKBONE_DIR = Path(self.ROOT) / f'backbones'
+            self.TEST_DIR = Path(self.ROOT) / f'test'
+            self.CHECKPOINT_DIR = Path(self.ROOT) / f'checkpiont'
+
+
         # set tracking uri according to flag value
         if data['mlflow']['tracking_flag'] == 'dagshub':
             self.TRACKING_URI = data['mlflow']['tracking_uri_dagshub']
